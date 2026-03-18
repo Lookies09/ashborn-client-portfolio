@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65a88bf0ffa4b26448d8d2e0003690ff, type: 3}
+  m_Name: AttackBoost
+  m_EditorClassIdentifier: Assembly-CSharp::SkillDataSO
+  skillIcon: {fileID: 21300000, guid: 7f3aee80f6ace774685fc26d96ed08ae, type: 3}
+  skillNameKR: "\uACF5\uACA9\uB825 \uC99D\uAC00 "
+  skillNameJP: "\u653B\u6483\u529B\u5897\u52A0 "
+  skillNameEN: Attack Boost
+  descriptionFormatKR: "\uACF5\uACA9\uB825 {percent}% \uC99D\uAC00"
+  descriptionFormatEN: 
+  descriptionFormatJP: 
+  skillType: 1
+  usage: 0
+  activationType: 1
+  levelData:
+  - level: 1
+    damage: 0
+    cooldown: 0
+    range: 0
+    projectileCount: 0
+    duration: 0
+    targetCount: 0
+    percentageValue: 0.1
+    absoluteValue: 0
+  - level: 2
+    damage: 0
+    cooldown: 0
+    range: 0
+    projectileCount: 0
+    duration: 0
+    targetCount: 0
+    percentageValue: 0.2
+    absoluteValue: 0
+  - level: 3
+    damage: 0
+    cooldown: 0
+    range: 0
+    projectileCount: 0
+    duration: 0
+    targetCount: 0
+    percentageValue: 0.3
+    absoluteValue: 0
+  - level: 4
+    damage: 0
+    cooldown: 0
+    range: 0
+    projectileCount: 0
+    duration: 0
+    targetCount: 0
+    percentageValue: 0.4
+    absoluteValue: 0
+  - level: 5
+    damage: 0
+    cooldown: 0
+    range: 0
+    projectileCount: 0
+    duration: 0
+    targetCount: 0
+    percentageValue: 0.5
+    absoluteValue: 0
+  skillDescription: "\uC778\uAC8C\uC784 \uACF5\uACA9\uB825\uC744 \uC99D\uAC00\uC2DC\uD0A8\uB2E4"
+  implementationType: 6
+  skillPrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 0}
+  castEffectPrefab: {fileID: 0}
+  castSound: {fileID: 0}
+  hitSound: {fileID: 0}

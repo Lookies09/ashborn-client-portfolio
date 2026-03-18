@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16a1e3e961f5b834cbfb54b5ea1ebc9b, type: 3}
+  m_Name: CurrentPlayerStateLevel
+  m_EditorClassIdentifier: Assembly-CSharp::CurrentPlayerStateLevelSO
+  levels:
+  - statType: 0
+    level: 0
+  - statType: 1
+    level: 0
+  - statType: 2
+    level: 0
+  - statType: 3
+    level: 0
+  - statType: 4
+    level: 0
+  - statType: 5
+    level: 0
+  - statType: 6
+    level: 0
+  - statType: 7
+    level: 0
+  - statType: 8
+    level: 0
+  - statType: 9
+    level: 0

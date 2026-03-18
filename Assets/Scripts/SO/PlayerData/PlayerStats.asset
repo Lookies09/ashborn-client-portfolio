@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bef3d6bbb075d6646be6e5f30117c511, type: 3}
+  m_Name: PlayerStats
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStatsSO
+  maxHP: 100
+  attack: 20
+  moveSpeed: 3.5
+  critRate: 0.05
+  critDamage: 1.5
+  defense: 5
+  luck: 0.05
+  cooldownReduction: 0
+  regenPerSecond: 0
+  maxMp: 100

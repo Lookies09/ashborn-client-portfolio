@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: Amethyst
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 8005
+  itemNameKR: "\uC790\uC218\uC815"
+  itemNameEN: Amethyst
+  descriptionKR: "\uBCF4\uB78F\uBE5B \uAD11\uCC44\uB97C \uB760\uB294 \uC815\uC81C\uB41C
+    \uC790\uC218\uC815.\n\uC7A5\uC2E0\uAD6C\uB098 \uAC70\uB798\uC6A9\uC73C\uB85C
+    \uAC00\uCE58\uAC00 \uB192\uC544 \uC218\uC9D1 \uB300\uC0C1\uC774 \uB418\uB294
+    \uBCF4\uC11D\uC774\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: 21300000, guid: fdb66f63b8c64584e9e6d9ec881f981a, type: 3}
+  itemType: 5
+  useType: 0
+  equipSlot: 0
+  equipmentApplyType: 0
+  rarity: 2
+  acquisitionType: 0
+  canSell: 1
+  canPurchase: 0
+  sellPrice: 250
+  purchasePrice: 0
+  maxStack: 1
+  inventoryLimit: 99
+  baseModifiers: []

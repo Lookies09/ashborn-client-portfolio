@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: Bone
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 8003
+  itemNameKR: "\uBF08"
+  itemNameEN: Bone
+  descriptionKR: "\uC54C \uC218 \uC5C6\uB294 \uC0DD\uBB3C\uC758 \uBF08 \uC870\uAC01."
+  descriptionEN: 
+  itemIcon: {fileID: 21300000, guid: 8005c8016fc864846830389781078321, type: 3}
+  itemType: 5
+  useType: 0
+  equipSlot: 0
+  equipmentApplyType: 0
+  rarity: 0
+  acquisitionType: 0
+  canSell: 1
+  canPurchase: 0
+  sellPrice: 8
+  purchasePrice: 0
+  maxStack: 5
+  inventoryLimit: 99
+  baseModifiers: []

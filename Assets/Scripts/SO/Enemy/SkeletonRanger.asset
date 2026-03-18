@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9016a892372140e4b9f24bb49b48e1bd, type: 3}
+  m_Name: SkeletonRanger
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDataSO
+  EnemyName: SkeletonRanger
+  MaxHP: 60
+  MaxMoveSpeed: 4.5
+  WalkSpeed: 3
+  RunSpeed: 4.5
+  ChaseRange: 20
+  DetectionRange: 8
+  SuspiciousRange: 17
+  SightAngl: 120
+  BaseAttackRange: 15
+  GlobalAttackCooldown: 0.5
+  Attacks:
+  - type: 1
+    meleeRadius: 0
+    targetMask:
+      serializedVersion: 2
+      m_Bits: 128
+    range: 15
+    cooldown: 0.5
+    damage: 12
+    animationDuration: 0
+    animationName: GhostSamurai_Bow_Shoot_SP01_Root
+    projectilePrefab: {fileID: 5073586428836493024, guid: 453bcd4a57b6eb14d94fa3ed3c3d6eba, type: 3}
+    projectileLifeTime: 5
+    projectileSpeed: 10
+    castEffect: {fileID: 1415084926452247498, guid: f09e700882e44e6468ef67e64f949abb, type: 3}
+    hitEffect: {fileID: 4509985432130123310, guid: 695ee610a7e0f9c41b6351c98b68c31f, type: 3}
+    hitSound: {fileID: 0}
+    aoePrefab: {fileID: 0}
+    aoeRadius: 0
+    aoeDuration: 0
+    summonPrefab: {fileID: 0}
+    summonCount: 0
+    comboCount: 0
+    comboInterval: 0
+    weight: 0
+    minDistance: 0
+    maxDistance: 15
+  ExpReward: 100
+  dropGold: 50

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: ClothHood
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 3001
+  itemNameKR: "\uCC9C \uD6C4\uB4DC"
+  itemNameEN: Cloth Hood
+  descriptionKR: "\uAC00\uBCBC\uC6B4 \uCC9C\uC73C\uB85C \uB9CC\uB4E4\uC5B4\uC9C4
+    \uD6C4\uB4DC. \uAE30\uBCF8\uC801\uC778 \uBC29\uC5B4\uB9CC \uC81C\uACF5\uD55C\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: 21300000, guid: 9c9ead007de329349b504b58ff9abfb0, type: 3}
+  itemType: 1
+  useType: 0
+  equipSlot: 1
+  equipmentApplyType: 1
+  rarity: 0
+  acquisitionType: 2
+  canSell: 1
+  canPurchase: 1
+  sellPrice: 30
+  purchasePrice: 120
+  maxStack: 1
+  inventoryLimit: 99
+  baseModifiers:
+  - statType: 4
+    flatValue: 0.07
+    percentValue: 0

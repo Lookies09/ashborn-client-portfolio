@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: Emerald Ring
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 5003
+  itemNameKR: "\uC5D0\uBA54\uB784\uB4DC \uBC18\uC9C0"
+  itemNameEN: Emerald Ring
+  descriptionKR: "\uACE0\uAE09 \uC5D0\uBA54\uB784\uB4DC\uB97C \uC815\uAD50\uD558\uAC8C
+    \uC138\uACF5\uD55C \uBC18\uC9C0.\n\uAC15\uD55C \uC874\uC7AC\uAC10\uC744 \uC9C0\uB2C8\uBA70,
+    \uCC29\uC6A9\uC790\uC5D0\uAC8C \uD2B9\uBCC4\uD55C \uAC00\uCE58\uB97C \uBD80\uC5EC\uD558\uB294
+    \uC7A5\uC2E0\uAD6C\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: 21300000, guid: 9dbda1f173c0a5b49a7dadf27682c8c5, type: 3}
+  itemType: 2
+  useType: 0
+  equipSlot: 5
+  equipmentApplyType: 1
+  rarity: 2
+  acquisitionType: 0
+  canSell: 1
+  canPurchase: 0
+  sellPrice: 750
+  purchasePrice: 0
+  maxStack: 1
+  inventoryLimit: 99
+  baseModifiers:
+  - statType: 3
+    flatValue: 0.2
+    percentValue: 0
