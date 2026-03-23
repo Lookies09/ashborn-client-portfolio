@@ -87,7 +87,7 @@ ashborn-client-portfolio/
 │     ├─ SO/
 │     ├─ Sound/
 │     ├─ UI/
-│     └─ Utility.cs
+│     └─ Utils.cs
 ├─ Docs/
 │  ├─ screenshots/
 │  ├─ architecture/
