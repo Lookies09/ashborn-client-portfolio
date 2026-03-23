@@ -27,6 +27,24 @@ Ashborn은 로그라이크 스킬 선택 시스템을 갖춘 모바일 탑다운
 
 ---
 
+## 시스템 아키텍처
+
+### 전체 게임 구조
+
+![전체 게임 구조](Docs/architecture/game-loop.png)
+
+### 스킬 시스템 구조
+
+![스킬 시스템 구조](Docs/architecture/skill-system.png)
+
+### 인벤토리 구조
+
+![인벤토리 구조](Docs/architecture/inventory-architecture.png)
+
+> 세부 구조 설명 자료는 `Docs/architecture/` 경로에 정리했습니다.
+
+---
+
 ## 포함된 내용
 
 - Unity 클라이언트 스크립트
