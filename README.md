@@ -143,7 +143,7 @@ ashborn-client-portfolio/
 
 ## 시연 링크
 
-- **itch.io** : 링크 추가 예정
+- **itch.io** : [Ash:born 링크](https://lookiesr.itch.io/ashborn)
 - **YouTube** : 링크 추가 예정
 
 > 추가 영상이나 참고 링크는 [`Docs/videos.md`](Docs/videos.md)에 정리되어 있습니다.
