@@ -1,0 +1,10 @@
+flowchart TD
+    START["세션 시작"] --> GRID["mapSizeX × mapSizeY 격자 생성"]
+    GRID --> TIER["중심 거리로 Easy / Middle / Hard / Boss 등급 결정"]
+    TIER --> PREFAB["필드 프리팹 무작위 선택"]
+    PREFAB --> ROTATE["0° / 90° / 180° / 270° 회전"]
+    ROTATE --> EVENT["탈출·아이템 타일 무작위 지정"]
+    EVENT --> NAV["NavMesh 빌드"]
+    NAV --> SPAWN["등급별 적 풀과 스폰 지점 선택"]
+    SPAWN --> DISTRIBUTE["타일 단위로 프레임 분산 배치"]
+    DISTRIBUTE --> PLAY["플레이 시작"]

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9016a892372140e4b9f24bb49b48e1bd, type: 3}
+  m_Name: NormalSkeletonData
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDataSO
+  EnemyName: NormalSkeletonData
+  MaxHP: 60
+  MaxMoveSpeed: 3.5
+  WalkSpeed: 2.3
+  RunSpeed: 3.5
+  ChaseRange: 100
+  DetectionRange: 8
+  SuspiciousRange: 15
+  SightAngl: 100
+  BaseAttackRange: 1.5
+  GlobalAttackCooldown: 0.6
+  Attacks:
+  - type: 0
+    meleeRadius: 0.8
+    targetMask:
+      serializedVersion: 2
+      m_Bits: 128
+    range: 1.5
+    cooldown: 0.6
+    damage: 10
+    animationDuration: 1.1
+    animationName: zombie_light_attack_02
+    projectilePrefab: {fileID: 0}
+    projectileLifeTime: 0
+    projectileSpeed: 0
+    castEffect: {fileID: 0}
+    hitEffect: {fileID: 0}
+    hitSound: {fileID: 0}
+    aoePrefab: {fileID: 0}
+    aoeRadius: 0
+    aoeDuration: 0
+    summonPrefab: {fileID: 0}
+    summonCount: 0
+    comboCount: 0
+    comboInterval: 0
+    weight: 0
+    minDistance: 0
+    maxDistance: 1.5
+  ExpReward: 40
+  dropGold: 50

@@ -1,0 +1,60 @@
+flowchart TD
+    subgraph Persistent["전역 수명주기 · 영구 시스템"]
+        GM["GameManager<br/>게임 상태 · 씬 전환 · 결과 정산"]
+        SCENE["SceneLoader<br/>Fade · Scene Load"]
+        PDM["PlayerDataManager<br/>JSON 저장 · 세션 복원"]
+        WALLET["PlayerWallet<br/>보유 골드 · 세션 골드 정산"]
+        SET["SettingManager<br/>오디오 · FPS · 조이스틱 설정"]
+        ADS["AdSDK / AdFlowController<br/>광고 상태 · 완료 콜백"]
+        POOL["ObjectPoolManager<br/>적·투사체·이펙트 재사용"]
+    end
+
+    subgraph Lobby["LobbyScene"]
+        LUI["LobbyUIManager<br/>던전 진입 · 강화 · 설정"]
+        SHOP["ShopController<br/>구매 · 판매 · 재고 검증"]
+        UPGRADE["Stat Upgrade UI<br/>영구 스탯 강화"]
+    end
+
+    subgraph InGame["InGameScene"]
+        IGM["InGameManager<br/>타이머 · 사망 · 탈출 판정"]
+        PLAYER["Player Components<br/>Movement · Health · Stats · Progress"]
+        MAP["MapManager<br/>타일 조합 · 구역 등급 · NavMesh"]
+        SPAWNER["EnemySpawner<br/>난이도별 적 배치 · 프레임 분산"]
+        ENEMY["Enemy Runtime<br/>Detection · Behavior · Attack Strategy"]
+        CULL["EnemyCullingManager<br/>거리 기반 활성화 · 분할 검사"]
+        SKILL["SkillManager<br/>ISkill 생성 · 레벨 · 마나"]
+        ITEM["Inventory / Equipment / QuickSlot"]
+        UI["UIManager / InGameHUDController<br/>패널 · HUD · 일시정지"]
+    end
+
+    LUI -->|"GoToGame"| GM
+    GM -->|"Scene load 요청"| SCENE
+    SCENE -->|"InGameScene"| IGM
+
+    IGM --> PLAYER
+    IGM --> MAP
+    MAP -->|"타일 생성 · NavMesh 완료"| SPAWNER
+    SPAWNER -->|"Spawn(poolId)"| POOL
+    POOL --> ENEMY
+    CULL -->|"거리 기준 활성/비활성"| ENEMY
+    PLAYER --> CULL
+    PLAYER <-->|"전투"| ENEMY
+    PLAYER --> SKILL
+    PLAYER --> ITEM
+    IGM --> UI
+
+    SHOP --> ITEM
+    SHOP --> WALLET
+    UPGRADE --> PLAYER
+    PDM <-->|"인벤토리 · 장비 · 퀵슬롯"| ITEM
+    PDM <-->|"골드"| WALLET
+    PDM <-->|"영구 스탯"| PLAYER
+
+    GM -->|"사망 / 탈출"| UI
+    GM -->|"EndStage"| WALLET
+    GM -->|"스테이지 종료"| ADS
+    GM -->|"풀 객체 회수"| POOL
+    ADS -->|"완료 콜백"| GM
+    GM -->|"LobbyScene 요청"| SCENE
+    SCENE -->|"LobbyScene"| LUI
+    SET --> UI

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: GoldArmor
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 2003
+  itemNameKR: "\uAE08 \uAC11\uC637"
+  itemNameEN: Gold Armor
+  descriptionKR: "\uAE08\uC18D \uAD11\uD0DD\uC774 \uC0B4\uC544 \uC788\uB294 \uAE08
+    \uAC11\uC637.\n\uB192\uC740 \uC0C1\uC9D5\uC131\uACFC \uD568\uAED8 \uC6B0\uC218\uD55C
+    \uC81C\uC791 \uC644\uC131\uB3C4\uB97C \uC9C0\uB2CC \uACE0\uAE09 \uBC29\uC5B4\uAD6C\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: 21300000, guid: 16ef7c5f4a8b8fa45a9c74d18a1b6002, type: 3}
+  itemType: 1
+  useType: 0
+  equipSlot: 2
+  equipmentApplyType: 1
+  rarity: 2
+  acquisitionType: 0
+  canSell: 1
+  canPurchase: 0
+  sellPrice: 250
+  purchasePrice: 0
+  maxStack: 1
+  inventoryLimit: 99
+  baseModifiers:
+  - statType: 5
+    flatValue: 6
+    percentValue: 0

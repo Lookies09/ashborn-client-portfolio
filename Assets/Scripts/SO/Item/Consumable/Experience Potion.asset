@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: Experience Potion
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 6002
+  itemNameKR: "\uC18C\uD615 \uACBD\uD5D8\uCE58 \uD3EC\uC158"
+  itemNameEN: Experience Potion
+  descriptionKR: "\uC0AC\uC6A9 \uC989\uC2DC 500XP\uC758 \uACBD\uD5D8\uCE58\uB97C
+    \uD68D\uB4DD\uD55C\uB2E4.\n\uBE60\uB978 \uC131\uC7A5\uACFC \uC2A4\uD0AC \uD68D\uB4DD
+    \uBAA9\uC801\uC73C\uB85C \uC81C\uC791\uB41C \uC2E4\uC804 \uC9C0\uD5A5 \uC18C\uBAA8\uD488\uC774\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: -1868062085, guid: 2498aac920d7d384eb5d79a47896548b, type: 3}
+  itemType: 3
+  useType: 1
+  equipSlot: 6
+  equipmentApplyType: 0
+  rarity: 2
+  acquisitionType: 2
+  canSell: 1
+  canPurchase: 1
+  sellPrice: 100
+  purchasePrice: 400
+  maxStack: 3
+  inventoryLimit: 99
+  baseModifiers: []
+  consumableEffects:
+  - effectType: 5
+    value: 500
+    duration: 0
+  consumableUseSound: {fileID: 8300000, guid: 164d95bb13c89480a9e40e667cb4f9a3, type: 3}

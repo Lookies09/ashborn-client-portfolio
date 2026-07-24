@@ -1,0 +1,50 @@
+flowchart TD
+    subgraph SkillData["스킬 데이터"]
+        LIST["SkillDataListSO<br/>런타임 후보 목록"]
+        DATA["SkillDataSO<br/>메타데이터 · 레벨 데이터 · 구현 타입"]
+        LIST --> DATA
+    end
+
+    subgraph Progression["경험치 · 선택 흐름"]
+        PROGRESS["PlayerProgress<br/>CurrentExp · CurrentLevel"]
+        LEVEL["PlayerLevelManager<br/>필요 경험치 · 후보 필터링"]
+        CARD["SkillCard[]<br/>무작위 후보 표시"]
+        UIM["UIManager<br/>선택 중 일시정지 / 선택 후 재개"]
+        PROGRESS -->|"AddExp / TryLevelUp"| LEVEL
+        LEVEL --> CARD
+        LEVEL --> UIM
+    end
+
+    subgraph Runtime["런타임 스킬 관리"]
+        MANAGER["SkillManager<br/>등록 · 활성 상태 · 마나 · UpdateSkill"]
+        TYPEMAP["ImplementationType → System.Type"]
+        CONTRACT["ISkill<br/>Initialize · Activate · LevelUp · Cleanup"]
+        BASE["BaseSkill<br/>공통 쿨다운 · 레벨 상태"]
+        ATTACK["Attack Skills<br/>CrossSlash · SpiritFlame · HolyArea …"]
+        BUFF["Buff Skills<br/>AttackBoost · DefenseBoost · Regen …"]
+        UTILITY["Utility Skills<br/>GoldBonus · ExpBonus"]
+
+        MANAGER --> TYPEMAP
+        TYPEMAP -->|"AddComponent(type)"| CONTRACT
+        CONTRACT --> BASE
+        BASE --> ATTACK
+        BASE --> BUFF
+        BASE --> UTILITY
+    end
+
+    DATA --> MANAGER
+    CARD -->|"선택한 SkillDataSO"| MANAGER
+    MANAGER -->|"기존 스킬"| EXISTING["LevelUp(nextLevel)"]
+    MANAGER -->|"신규 스킬"| NEW["Create → Initialize → LevelUp(1)"]
+    EXISTING --> CONTRACT
+    NEW --> CONTRACT
+
+    subgraph PlayerRuntime["플레이어 런타임 반영"]
+        STATS["PlayerRuntimeStats<br/>런타임 보정치"]
+        HEALTH["PlayerHealth<br/>회복 · 최대 체력"]
+        REWARD["RewardManager<br/>골드 · 경험치 보너스"]
+        ATTACK --> STATS
+        BUFF --> STATS
+        BUFF --> HEALTH
+        UTILITY --> REWARD
+    end

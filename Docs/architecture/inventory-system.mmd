@@ -1,0 +1,65 @@
+flowchart TD
+    subgraph StaticData["정적 데이터 · ScriptableObject"]
+        LIST["ItemDataListSO<br/>아이템 카탈로그"]
+        ITEMSO["ItemDataSO<br/>ID · 타입 · 가격 · 스탯 · 스택"]
+        DROP["ItemDropTableSO<br/>가중치 · 드롭 개수"]
+        LIST --> ITEMSO
+        DROP --> ITEMSO
+    end
+
+    subgraph RuntimeModel["런타임 아이템 모델"]
+        INSTANCE["ItemInstance<br/>Guid · ItemDataSO · quantity"]
+        SLOTDATA["InventorySlotData[]"]
+        INV["InventoryManager<br/>스택 · 교환 · 전송 · 제거 · 이벤트"]
+        ITEMSO --> INSTANCE
+        INSTANCE --> SLOTDATA
+        SLOTDATA --> INV
+    end
+
+    subgraph SlotUI["슬롯 UI 역할 분리"]
+        BASE["ItemSlot<br/>공통 표시 · 일반 이동/드롭"]
+        EQUIP_SLOT["EquipSlot<br/>장비 타입 검증 · 장착/해제"]
+        QUICK_SLOT["QuickSlot<br/>아이템 소유 없이 Guid 참조"]
+        BASE --> EQUIP_SLOT
+        BASE --> QUICK_SLOT
+    end
+
+    subgraph DomainManagers["도메인별 관리자"]
+        EQUIP["EquipmentManager<br/>장비 소유 · 스탯 적용/제거"]
+        QUICK["QuickSlotManager<br/>Guid 바인딩 · 이동/삭제 추적"]
+        SHOP["ShopController<br/>공간 · 재고 · 골드 검증"]
+        CHEST["ChestInteractable<br/>상자 인벤토리 열기/닫기"]
+        USE["ItemUseSystem<br/>아이템 타입별 사용 진입점"]
+    end
+
+    INV -->|"OnInventoryChanged"| BASE
+    INV -->|"OnItemMoved / OnItemRemoved"| QUICK
+    EQUIP --> EQUIP_SLOT
+    QUICK --> QUICK_SLOT
+    INV --> EQUIP
+    INV --> SHOP
+    CHEST --> INV
+    QUICK --> USE
+
+    subgraph PlayerEffect["플레이어 반영"]
+        EQUIP_HANDLER["EquipItemHandler"]
+        CONSUME_HANDLER["ConsumeItemHandler"]
+        CONTEXT["PlayerContext<br/>Health · RuntimeStats · Inventory"]
+        EQUIP --> EQUIP_HANDLER
+        USE --> CONSUME_HANDLER
+        EQUIP_HANDLER --> CONTEXT
+        CONSUME_HANDLER --> CONTEXT
+    end
+
+    subgraph Persistence["저장 · 복원"]
+        PDM["PlayerDataManager"]
+        JSON[("player_data.json")]
+        INV -->|"ItemId · Amount · SlotIndex"| PDM
+        EQUIP -->|"SlotType · ItemId"| PDM
+        QUICK -->|"QuickSlotIndex · InventoryIndex"| PDM
+        PDM --> JSON
+        JSON --> PDM
+        PDM -->|"Load / LoadSessionData"| INV
+        PDM --> EQUIP
+        PDM --> QUICK
+    end

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: HealingPotion
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 6001
+  itemNameKR: "\uC18C\uD615 \uCE58\uC720 \uD3EC\uC158"
+  itemNameEN: 'Healing Potion '
+  descriptionKR: "\uC0C1\uCC98 \uD68C\uBCF5\uC744 \uBAA9\uC801\uC73C\uB85C \uC870\uC81C\uB41C
+    \uAE30\uBCF8 \uCE58\uC720 \uD3EC\uC158.\n\uC989\uC2DC \uCCB4\uB825\uC744 20 \uD68C\uBCF5\uC2DC\uD0A8\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: -1153713657, guid: 2498aac920d7d384eb5d79a47896548b, type: 3}
+  itemType: 3
+  useType: 1
+  equipSlot: 6
+  equipmentApplyType: 0
+  rarity: 1
+  acquisitionType: 2
+  canSell: 1
+  canPurchase: 1
+  sellPrice: 25
+  purchasePrice: 100
+  maxStack: 3
+  inventoryLimit: 99
+  baseModifiers: []
+  consumableEffects:
+  - effectType: 1
+    value: 20
+    duration: 0
+  consumableUseSound: {fileID: 8300000, guid: 164d95bb13c89480a9e40e667cb4f9a3, type: 3}

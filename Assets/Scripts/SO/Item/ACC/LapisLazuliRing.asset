@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: LapisLazuliRing
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 5002
+  itemNameKR: "\uCCAD\uAE08\uC11D \uBC18\uC9C0"
+  itemNameEN: Lapis Lazuli Ring
+  descriptionKR: "\uCCAD\uAE08\uC11D\uC744 \uC7A5\uC2DD\uC73C\uB85C \uC0AC\uC6A9\uD55C
+    \uBC18\uC9C0.\n\uC7A5\uC2DD\uC131\uACFC \uC2E4\uC6A9\uC131\uC744 \uACB8\uBE44\uD574
+    \uAE30\uBCF8\uC801\uC778 \uC7A5\uC2E0\uAD6C \uC5ED\uD560\uC744 \uC218\uD589\uD55C\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: 21300000, guid: cdbe674bcf18388499b73a8135ac98bd, type: 3}
+  itemType: 2
+  useType: 0
+  equipSlot: 5
+  equipmentApplyType: 1
+  rarity: 1
+  acquisitionType: 0
+  canSell: 1
+  canPurchase: 0
+  sellPrice: 100
+  purchasePrice: 0
+  maxStack: 1
+  inventoryLimit: 99
+  baseModifiers:
+  - statType: 7
+    flatValue: 0.03
+    percentValue: 0

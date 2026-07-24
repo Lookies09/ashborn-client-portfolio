@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e89ad4e4660a3f4a9b76a678b416209, type: 3}
+  m_Name: PlateBoots
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDataSO
+  itemId: 4002
+  itemNameKR: "\uD310\uAE08 \uBD80\uCE20"
+  itemNameEN: Plate Boots
+  descriptionKR: "\uAE08\uC18D \uD310\uAE08\uC744 \uB367\uB300\uC5B4 \uC81C\uC791\uB41C
+    \uBD80\uCE20. \uAE30\uBCF8\uC801\uC778 \uBC29\uC5B4 \uC131\uB2A5\uC744 \uB118\uC5B4
+    \uBC1C\uC744 \uD655\uC2E4\uD558\uAC8C \uBCF4\uD638\uD558\uBA70, \uBB34\uAC8C\uAC10
+    \uC788\uB294 \uCC29\uC6A9\uAC10\uC744 \uC81C\uACF5\uD55C\uB2E4."
+  descriptionEN: 
+  itemIcon: {fileID: 21300000, guid: dbb7a62c8883b344aab5326d99a2354e, type: 3}
+  itemType: 1
+  useType: 0
+  equipSlot: 3
+  equipmentApplyType: 1
+  rarity: 1
+  acquisitionType: 0
+  canSell: 1
+  canPurchase: 0
+  sellPrice: 100
+  purchasePrice: 0
+  maxStack: 1
+  inventoryLimit: 99
+  baseModifiers:
+  - statType: 5
+    flatValue: 3
+    percentValue: 0
