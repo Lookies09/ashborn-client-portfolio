@@ -258,6 +258,8 @@ flowchart LR
 - 검사 대상도 한 프레임에 전부 처리하지 않고 `checksPerFrame` 단위로 나눕니다.
 - 거리 비교에는 `sqrMagnitude`를 사용하여 제곱근 계산을 피합니다.
 
+> 현재 공개 코드에서는 이동 판정과 분할 검사 진행이 결합되어 있어, 첫 chunk 이후 플레이어가 멈추면 남은 대상 검사가 이어지지 않을 수 있습니다. 전체 scan 완료를 보장하는 상태 기반 구현은 아직 반영되지 않았으며, 자세한 진단은 [기술 문서](../technical/README.md#1-enemy-multi-frame-scan-stopping-after-the-first-chunk)에 기록합니다.
+
 ## 5. 런타임 맵 조합 흐름
 
 ```mermaid
