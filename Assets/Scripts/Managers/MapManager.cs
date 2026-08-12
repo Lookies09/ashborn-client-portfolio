@@ -1,12 +1,11 @@
 using System.Collections.Generic;
-using System.Linq;
 using Unity.AI.Navigation;
-using Unity.AppUI.UI;
+using Unity.Profiling;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class MapManager : MonoBehaviour
 {
+    private static readonly ProfilerMarker UpdateActiveTilesMarker = new("MapManager.UpdateActiveTiles");
     [SerializeField] private float activeRadius = 30f;
     [SerializeField] private float tileSize = 20f;
     [SerializeField] private float updateThreshold = 1f;
@@ -29,6 +28,8 @@ public class MapManager : MonoBehaviour
     private Tile[,] _tiles = new Tile[7, 7];
     private List<Tile> _tileList = new List<Tile>();
     private Dictionary<AreaTier, List<Tile>> _tierTileDictionary = new();
+    private HashSet<Tile> _activeTiles = new();
+    private HashSet<Tile> _desiredActiveTiles = new();
     private Transform _player;
     private Vector3 _lastPlayerPos;
     private Vector3 _mapOrigin;
@@ -36,7 +37,15 @@ public class MapManager : MonoBehaviour
     //private bool _built = false;
 
 
-    void Awake()
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [Header("Runtime Diagnostics (Read Only)")]
+    [SerializeField] private Vector2Int diagnosticPlayerGrid;
+    [SerializeField] private int diagnosticTotalTiles;
+    [SerializeField] private int diagnosticActiveTiles;
+    [SerializeField] private float diagnosticActiveRadius;
+#endif
+
+    private void Awake()
     {
         _tiles = new Tile[mapSizeX, mapSizeY];
 
@@ -88,10 +97,7 @@ public class MapManager : MonoBehaviour
 
         _surface.BuildNavMesh();
 
-        _tiles.Cast<Tile>()
-      .Where(t => t != null)
-      .ToList()
-      .ForEach(t => t.gameObject.SetActive(false));
+        DeactivateAllTiles();
 
         StartCoroutine(enemySpawner.CoSpawnAllEnemies(_tiles));
         // 메모리 해제
@@ -106,35 +112,125 @@ public class MapManager : MonoBehaviour
         InGameManager.Instance.SetPlayerOnStartPos(spawnPoes[0]);
     }
 
-    void Update()
+    private void Update()
     {
-        Vector3 p = _player.position;
-        if ((p - _lastPlayerPos).sqrMagnitude <= updateThreshold * updateThreshold)
-            return;
-
-        _lastPlayerPos = p;
-
-        int px = Mathf.FloorToInt((p.x - _mapOrigin.x) / tileSize);
-        int py = Mathf.FloorToInt((p.z - _mapOrigin.z) / tileSize);
-
-        int radiusTiles = Mathf.CeilToInt(activeRadius / tileSize);
-
-        for (int x = Mathf.Max(0, px - radiusTiles); x < Mathf.Min(mapSizeX, px + radiusTiles + 1); x++)
+        Vector3 playerPosition = _player.position;
+        if ((playerPosition - _lastPlayerPos).sqrMagnitude <= updateThreshold * updateThreshold)
         {
-            for (int y = Mathf.Max(0, py - radiusTiles); y < Mathf.Min(mapSizeY, py + radiusTiles + 1); y++)
+            return;
+        }
+
+        _lastPlayerPos = playerPosition;
+
+        int playerGridX = Mathf.FloorToInt((playerPosition.x - _mapOrigin.x) / tileSize);
+        int playerGridY = Mathf.FloorToInt((playerPosition.z - _mapOrigin.z) / tileSize);
+        UpdateActiveTiles(playerPosition, playerGridX, playerGridY);
+    }
+
+    private void UpdateActiveTiles(Vector3 playerPosition, int playerGridX, int playerGridY)
+    {
+        using (UpdateActiveTilesMarker.Auto())
+        {
+            _desiredActiveTiles.Clear();
+
+            int radiusTiles = Mathf.CeilToInt(activeRadius / tileSize);
+            float activeRadiusSqr = activeRadius * activeRadius;
+
+            for (int x = Mathf.Max(0, playerGridX - radiusTiles); x < Mathf.Min(mapSizeX, playerGridX + radiusTiles + 1); x++)
+            {
+                for (int y = Mathf.Max(0, playerGridY - radiusTiles); y < Mathf.Min(mapSizeY, playerGridY + radiusTiles + 1); y++)
+                {
+                    Tile tile = _tiles[x, y];
+                    if (tile == null)
+                    {
+                        continue;
+                    }
+
+                    float distSqr = (tile.transform.position - playerPosition).sqrMagnitude;
+                    if (distSqr < activeRadiusSqr)
+                    {
+                        _desiredActiveTiles.Add(tile);
+                    }
+                }
+            }
+
+            foreach (Tile tile in _activeTiles)
+            {
+                if (tile != null && !_desiredActiveTiles.Contains(tile))
+                {
+                    SetTileActive(tile, false);
+                }
+            }
+
+            foreach (Tile tile in _desiredActiveTiles)
+            {
+                if (!_activeTiles.Contains(tile))
+                {
+                    SetTileActive(tile, true);
+                }
+            }
+
+            HashSet<Tile> previousActiveTiles = _activeTiles;
+            _activeTiles = _desiredActiveTiles;
+            _desiredActiveTiles = previousActiveTiles;
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        RefreshDiagnostics(playerGridX, playerGridY);
+#endif
+    }
+
+    private void DeactivateAllTiles()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        int totalTiles = 0;
+#endif
+
+        for (int x = 0; x < mapSizeX; x++)
+        {
+            for (int y = 0; y < mapSizeY; y++)
             {
                 Tile tile = _tiles[x, y];
-                if (tile == null) continue;
+                if (tile == null)
+                {
+                    continue;
+                }
 
-                float distSqr = (tile.transform.position - p).sqrMagnitude;
-                bool active = distSqr < activeRadius * activeRadius;
-
-                if (tile.gameObject.activeSelf != active)
-                    tile.gameObject.SetActive(active);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                totalTiles++;
+#endif
+                SetTileActive(tile, false);
             }
         }
 
+        _activeTiles.Clear();
+        _desiredActiveTiles.Clear();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        diagnosticTotalTiles = totalTiles;
+        diagnosticActiveTiles = 0;
+        diagnosticActiveRadius = activeRadius;
+#endif
     }
+
+    private static void SetTileActive(Tile tile, bool active)
+    {
+        if (tile.gameObject.activeSelf != active)
+        {
+            tile.gameObject.SetActive(active);
+        }
+
+        tile.IsActive = active;
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private void RefreshDiagnostics(int playerGridX, int playerGridY)
+    {
+        diagnosticPlayerGrid = new Vector2Int(playerGridX, playerGridY);
+        diagnosticActiveTiles = _activeTiles.Count;
+        diagnosticActiveRadius = activeRadius;
+    }
+#endif
 
     private void CreateTiles()
     {
@@ -226,4 +322,51 @@ public class MapManager : MonoBehaviour
         Destroy(wall.GetComponent<MeshRenderer>());
     }
 
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (_tiles == null)
+        {
+            return;
+        }
+
+        for (int x = 0; x < _tiles.GetLength(0); x++)
+        {
+            for (int y = 0; y < _tiles.GetLength(1); y++)
+            {
+                Tile tile = _tiles[x, y];
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                Gizmos.color = tile.gameObject.activeSelf ? Color.green : Color.gray;
+                Gizmos.DrawWireCube(tile.transform.position, new Vector3(tileSize, 0.1f, tileSize));
+            }
+        }
+
+        if (_player == null)
+        {
+            return;
+        }
+
+        Vector3 playerPosition = _player.position;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(playerPosition, activeRadius);
+
+        int playerGridX = Mathf.FloorToInt((playerPosition.x - _mapOrigin.x) / tileSize);
+        int playerGridY = Mathf.FloorToInt((playerPosition.z - _mapOrigin.z) / tileSize);
+        if (playerGridX < 0 || playerGridX >= _tiles.GetLength(0) || playerGridY < 0 || playerGridY >= _tiles.GetLength(1))
+        {
+            return;
+        }
+
+        Tile currentTile = _tiles[playerGridX, playerGridY];
+        if (currentTile != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(currentTile.transform.position + Vector3.up * 0.1f, new Vector3(tileSize, 0.2f, tileSize));
+        }
+    }
+#endif
 }

@@ -8,7 +8,7 @@ public class AdSDK : MonoBehaviour
     [SerializeField] private RewardedAdHandler rewardedHandler;
     [SerializeField] private InterstitialAdHandler interstitialHandler;
     [SerializeField] private string androidAppKey = "ANDROID_APP_KEY";
-    [SerializeField] private string userId;
+    [SerializeField] private string userId = "User00";
 
     [Header("Retry Value When Init Failed")]
     [SerializeField] private int maxInitRetry = 3;

@@ -103,7 +103,7 @@ public class ShopItemModal : MonoBehaviour
         string plusHex = "#" + ColorUtility.ToHtmlStringRGB(plusColor);
         string minusHex = "#" + ColorUtility.ToHtmlStringRGB(minusColor);
 
-        // 장비 아이템인 경우
+        // 1. 장비 아이템인 경우 (스탯 수정자 출력)
         if (data.itemType == ItemType.Weapon || data.itemType == ItemType.Armor || data.itemType == ItemType.Accessory)
         {
             if (data.baseModifiers == null || data.baseModifiers.Count == 0) return "능력치 변화 없음";
@@ -121,7 +121,7 @@ public class ShopItemModal : MonoBehaviour
                     sb.AppendLine($"{statName} <color={colorTag}>{sign}{formatted}</color>");
                 }
 
-                // 퍼센트 수치 처리
+                // 퍼센트 수치(Percent) 처리
                 if (mod.percentValue != 0)
                 {
                     string colorTag = mod.percentValue > 0 ? plusHex : minusHex;
@@ -131,7 +131,7 @@ public class ShopItemModal : MonoBehaviour
                 }
             }
         }
-        // 소모 아이템인 경우
+        // 2. 소모 아이템인 경우 (회복/버프 효과 출력)
         else if (data.itemType == ItemType.Consumable)
         {
             if (data.consumableEffects.Count == 0) return "특수 효과 없음";

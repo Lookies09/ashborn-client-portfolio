@@ -174,6 +174,7 @@ public class ShopController : MonoBehaviour
         if (!playerInventory.HasSpaceForItem(entry.itemData, quantity))
         {
             Debug.LogWarning("인벤토리 공간 부족");
+            // 여기서 유저에게 알림 UI(Toast 등)를 띄워주면 좋습니다.
             return false;
         }
 

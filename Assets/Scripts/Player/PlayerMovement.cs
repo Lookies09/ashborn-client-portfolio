@@ -1,4 +1,7 @@
 using UnityEngine;
+#if UNITY_WEBGL || UNITY_EDITOR
+using UnityEngine.InputSystem;
+#endif
 using static PlayerEnums;
 
 public class PlayerMovement : MonoBehaviour
@@ -39,12 +42,11 @@ public class PlayerMovement : MonoBehaviour
 
         if (_stateMachine.CurrentState == PlayerState.Dead)  return;
 
+#if !UNITY_WEBGL && !UNITY_EDITOR
         if (Joystick.Instance == null) return;
+#endif
 
-        float x = Joystick.Instance.Horizontal;
-        float y = Joystick.Instance.Vertical;
-
-        MoveDirection = new Vector2(x, y);
+        MoveDirection = Vector2.ClampMagnitude(ReadMoveInput(), 1f);
         IsMoving = MoveDirection.sqrMagnitude > 0;
 
         Velocity = MoveDirection.magnitude * _cacheMoveSpeed;
@@ -63,6 +65,57 @@ public class PlayerMovement : MonoBehaviour
             );
         }
     }
+
+    private static Vector2 ReadMoveInput()
+    {
+#if UNITY_WEBGL || UNITY_EDITOR
+        Vector2 keyboardInput = ReadKeyboardInput();
+        if (keyboardInput.sqrMagnitude > 0f)
+        {
+            return keyboardInput;
+        }
+#endif
+
+        return Joystick.Instance != null
+            ? new Vector2(Joystick.Instance.Horizontal, Joystick.Instance.Vertical)
+            : Vector2.zero;
+    }
+
+#if UNITY_WEBGL || UNITY_EDITOR
+    private static Vector2 ReadKeyboardInput()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
+        {
+            return Vector2.zero;
+        }
+
+        float horizontal = 0f;
+        float vertical = 0f;
+
+        if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
+        {
+            horizontal -= 1f;
+        }
+
+        if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
+        {
+            horizontal += 1f;
+        }
+
+        if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
+        {
+            vertical -= 1f;
+        }
+
+        if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
+        {
+            vertical += 1f;
+        }
+
+        return new Vector2(horizontal, vertical);
+    }
+#endif
 
     public void GetSpeedStat()
     {

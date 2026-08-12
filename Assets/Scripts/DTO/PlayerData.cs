@@ -4,19 +4,19 @@ using System;
 [Serializable]
 public class SaveData
 {
-    // 재화 및 기본 정보
+    // 1. 재화 및 기본 정보
     public int Gold;
 
-    // 플레이어 스탯 레벨 (StatType, Level)
+    // 2. 플레이어 스탯 레벨 (StatType, Level)
     public List<StatLevelData> StatLevels = new List<StatLevelData>();
 
-    // 아이템 본체 데이터 (인벤토리)
+    // 3. 아이템 본체 데이터 (인벤토리)
     public List<ItemSaveData> InventoryItems = new List<ItemSaveData>();
 
-    // 장착 아이템 (슬롯 타입, 인벤토리 인덱스 혹은 아이템 ID)
+    // 4. 장착 아이템 (슬롯 타입, 인벤토리 인덱스 혹은 아이템 ID)
     public List<EquipSaveData> EquippedItems = new List<EquipSaveData>();
 
-    // 퀵슬롯 (퀵슬롯 인덱스, 인벤토리 인덱스)
+    // 5. 퀵슬롯 (퀵슬롯 인덱스, 인벤토리 인덱스)
     // 인벤토리의 몇 번째 칸 아이템이 등록되어 있는지 저장
     public List<QuickSlotSaveData> QuickSlots = new();
 }

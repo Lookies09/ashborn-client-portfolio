@@ -50,7 +50,7 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 특정 장착 슬롯의 아이템을 가져옴
+    /// 특정 장착 슬롯의 아이템을 가져옵니다.
     /// </summary>
     public InventoryManager.ItemInstance GetEquippedItem(ItemEnums.ItemEquipSlot type)
     {
@@ -62,7 +62,7 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 특정 장착 슬롯에 아이템을 장착
+    /// 특정 장착 슬롯에 아이템을 장착합니다.
     /// </summary>
     public void SetEquippedItem(InventoryManager.InventorySlotData itemData)
     {
@@ -111,7 +111,7 @@ public class EquipmentManager : MonoBehaviour
 
 
     /// <summary>
-    /// 모든 장착 슬롯의 UI를 업데이트
+    /// 모든 장착 슬롯의 UI를 업데이트합니다.
     /// </summary>
     public void UpdateEquipmentUI()
     {
@@ -126,7 +126,7 @@ public class EquipmentManager : MonoBehaviour
 
 
     /// <summary>
-    /// 아이템의 스탯을 플레이어에 적용
+    /// 아이템의 스탯을 플레이어에 적용합니다.
     /// </summary>
     private void ApplyItemStats(ItemInstance item)
     {
@@ -134,7 +134,7 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 아이템의 스탯을 플레이어에서 제거
+    /// 아이템의 스탯을 플레이어에서 제거합니다.
     /// </summary>
     private void RemoveItemStats(ItemInstance item)
     {

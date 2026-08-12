@@ -1,6 +1,6 @@
 /// <summary>
 /// 상호작용 가능한 오브젝트가 구현해야 하는 인터페이스
-/// 현재: 상자
+/// (상자, 문, NPC, 상점 등)
 /// </summary>
 public interface IInteractable
 {

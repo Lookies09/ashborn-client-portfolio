@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class Utils
+public static class Utill
 {
     public static Vector3 SetX(this Vector3 vec, float x)
     {

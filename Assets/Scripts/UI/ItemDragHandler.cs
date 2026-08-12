@@ -9,10 +9,10 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     // --- 내부 변수 ---
 
     private Transform originalParent; // 드래그 시작 시 원래 부모 (ItemSlot)
-    private Canvas canvas; 
-    private RectTransform rectTransform; 
-    private CanvasGroup canvasGroup;
-    private ScrollRect scrollRect;
+    private Canvas canvas; // 최상위 캔버스 (드래그 시 UI가 다른 UI 위에 표시되도록)
+    private RectTransform rectTransform; // 위치 조정을 위한 RectTransform
+    private CanvasGroup canvasGroup; // 레이캐스트 차단 및 다른 컴포넌트와 상호작용 방지
+    private ScrollRect scrollRect; // 스크롤뷰 충돌 방지
     private bool dropSuccessful = false; // 드롭이 성공했는지 추적
 
     void Awake()
@@ -20,7 +20,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
 
-        // 최상위 캔버스 찾기
+        // 최상위 캔버스 찾기 (없으면 에러 발생)
         canvas = GetComponentInParent<Canvas>().rootCanvas;
     }
 
@@ -39,6 +39,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         originalParent = rectTransform.parent;
 
         // 부모 슬롯에서 ItemSlot 컴포넌트를 찾아, 인덱스를 가져와서 저장합니다.
+        // ItemUI는 ItemSlot의 자식이므로 GetComponentInParent를 사용합니다.
         ItemSlot foundSlot = originalParent.GetComponentInParent<ItemSlot>();
         if (foundSlot != null) 
         {
@@ -60,7 +61,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         rectTransform.SetParent(canvas.transform);
         rectTransform.SetAsLastSibling(); // 다른 UI 위에 표시
 
-        // 드래그 중에는 레이캐스트를 차단
+        // 드래그 중에는 레이캐스트(클릭/터치 입력)를 차단
         canvasGroup.blocksRaycasts = false;
 
         // 드래그 중인 오브젝트를 반투명하게

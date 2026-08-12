@@ -37,12 +37,14 @@ public class ChestInteractable : MonoBehaviour, IInteractable
 
     public void OnFocus(PlayerInteractor interactor)
     {
-        // GetComponent<Outline>()?.enabled = true;
+        // 필요시 하이라이트 효과 등 추가 가능
+        // 예: GetComponent<Outline>()?.enabled = true;
     }
 
     public void OnLoseFocus(PlayerInteractor interactor)
     {
-        // GetComponent<Outline>()?.enabled = false;
+        // 하이라이트 해제 등 추가 가능
+        // 예: GetComponent<Outline>()?.enabled = false;
     }
 
     public void Interact(PlayerInteractor interactor)

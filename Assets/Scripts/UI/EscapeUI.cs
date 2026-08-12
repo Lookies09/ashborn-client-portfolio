@@ -50,13 +50,13 @@ public class EscapeUI : MonoBehaviour
     /// </summary>
     public void UpdateEscapeProgress(float progress01)
     {
-        // 게이지 이미지 업데이트
+        // 1. 게이지 이미지 업데이트
         if (progressGauge != null) progressGauge.fillAmount = progress01;
 
-        // 퍼센트 텍스트 업데이트
+        // 2. 퍼센트 텍스트 업데이트
         SetPercentText(progress01 * 100f);
 
-        // 탈출 완료 시 연출
+        // 3. (추천) 탈출 완료 시 연출
         if (progress01 >= 1f && stateText.text != "COMPLETE!")
         {
             OnEscapeComplete();

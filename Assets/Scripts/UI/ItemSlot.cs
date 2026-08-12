@@ -86,7 +86,7 @@ public class ItemSlot : MonoBehaviour, IDropHandler, IItemInfoProvider
 
             bool stacked = false;
 
-            // 스택 가능 여부 체크
+            // 1️⃣ 스택 가능 여부 체크
             if (sourceItem != null && targetItem != null &&
                 !sourceItem.IsEmpty && !targetItem.IsEmpty &&
                 sourceItem.item.itemDataSO.itemId == targetItem.item.itemDataSO.itemId &&
@@ -107,7 +107,7 @@ public class ItemSlot : MonoBehaviour, IDropHandler, IItemInfoProvider
                 }
             }
 
-            // 스택 안됐으면 Swap
+            // 2️⃣ 스택 안됐으면 Swap
             if (!stacked)
             {
                 ownerInventory.SwapItems(sourceIndex, targetIndex);

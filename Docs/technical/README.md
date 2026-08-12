@@ -1,41 +1,42 @@
-# ASH:BORN Technical Evidence
+# ASH:BORN 기술 근거 문서
 
-Public portfolio status: **Google Play 비공개 테스트 완료 · 프로덕션 출시 심사 진행**
+공개 포트폴리오 상태: **Google Play 비공개 테스트 완료 · 프로덕션 출시 심사 진행**
 
-This document records engineering evidence visible in the public Unity client subset. Source code remains the final evidence. Claims below are limited to the current local repository, except for the explicitly scoped rendering measurements in [Rendering Profiling](#rendering-profiling).
+현재 공개 Unity 클라이언트 코드에서 직접 확인할 수 있는 엔지니어링 근거를 정리합니다. 최종 근거는 항상 소스 코드입니다. 아래 설명은 현재 로컬 저장소의 구현만을 대상으로 하며, [렌더링 프로파일링](#rendering-profiling)의 측정값은 공개 저장소 외부 기록임을 별도로 표시합니다.
 
-## Current Public Code Audit
+## 현재 공개 코드 점검
 
-The current public code does **not** contain two newer runtime fixes. They are documented here as mismatches, not completed public-code claims.
+현재 공개 코드에서 두 가지 최신 런타임 수정과 진단 수단을 확인했습니다.
 
-| Area | Current public code | Portfolio implication |
+| 영역 | 현재 공개 코드 | 포트폴리오 문서화 기준 |
 |---|---|---|
-| Enemy Multi-frame Scan | [`EnemyCullingManager`](../../Assets/Scripts/Managers/EnemyCullingManager.cs) updates `_lastCheckedPlayerPos` before processing only `checksPerFrame` enemies. There is no persistent full-scan state or captured scan target. | The full-scan cursor fix must not be claimed as shipped in this public subset. |
-| Grid-based Tile Activation | [`MapManager`](../../Assets/Scripts/Managers/MapManager.cs) checks only the current candidate region around the player. It does not track separate `desiredActiveTiles` and `currentActiveTiles` sets. | Desired/current reconciliation must not be claimed as present in this public subset. |
+| Enemy Multi-frame Scan | [`EnemyCullingManager`](../../Assets/Scripts/Managers/EnemyCullingManager.cs)는 시작 위치와 대상 수를 캡처하고, `_scanInProgress`와 `_currentIndex`로 전체 대상 처리가 끝날 때까지 scan을 유지합니다. | 전체 scan을 여러 frame에 나누어 완료하는 구현으로 문서화합니다. |
+| Grid-based Tile Activation | [`MapManager`](../../Assets/Scripts/Managers/MapManager.cs)는 `_desiredActiveTiles`와 `_activeTiles`를 비교해 반경에서 나간 tile을 끄고 새로 들어온 tile을 켭니다. | Grid Active Set 조정 구현으로 문서화합니다. |
 
-Confirmed public-code evidence:
+현재 공개 코드에서 확인되는 근거:
 
-- Object pooling and pool registration: [`ObjectPoolManager`](../../Assets/Scripts/Managers/ObjectPoolManager.cs), [`PooledObject`](../../Assets/Scripts/Object/PooledObject.cs)
-- Enemy pooled lifecycle reset: [`EnemyController.OnSpawnInitialize`](../../Assets/Scripts/Enemy/EnemyController.cs), [`EnemySpawner`](../../Assets/Scripts/Enemy/EnemySpawner.cs)
-- Spawn work distribution with coroutine yielding: [`EnemySpawner.CoSpawnAllEnemies`](../../Assets/Scripts/Enemy/EnemySpawner.cs)
-- Event-driven UI/state updates: [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs), [`QuickSlotManager`](../../Assets/Scripts/Managers/QuickSlotManager.cs), [`SkillManager`](../../Assets/Scripts/Managers/SkillManager.cs), [`InGameHUDController`](../../Assets/Scripts/UI/InGameHUDController.cs), [`PlayerWallet`](../../Assets/Scripts/Player/PlayerWallet.cs)
-- Inventory, equipment, and quick slot ownership split: [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs), [`EquipmentManager`](../../Assets/Scripts/Managers/EquipmentManager.cs), [`QuickSlotManager`](../../Assets/Scripts/Managers/QuickSlotManager.cs)
+- 풀 등록과 재사용: [`ObjectPoolManager`](../../Assets/Scripts/Managers/ObjectPoolManager.cs), [`PooledObject`](../../Assets/Scripts/Object/PooledObject.cs)
+- 풀링된 적의 생명주기 초기화: [`EnemyController.OnSpawnInitialize`](../../Assets/Scripts/Enemy/EnemyController.cs), [`EnemySpawner`](../../Assets/Scripts/Enemy/EnemySpawner.cs)
+- 코루틴 `yield` 기반 생성 작업 분산: [`EnemySpawner.CoSpawnAllEnemies`](../../Assets/Scripts/Enemy/EnemySpawner.cs)
+- 이벤트 기반 UI와 상태 갱신: [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs), [`QuickSlotManager`](../../Assets/Scripts/Managers/QuickSlotManager.cs), [`SkillManager`](../../Assets/Scripts/Managers/SkillManager.cs), [`InGameHUDController`](../../Assets/Scripts/UI/InGameHUDController.cs), [`PlayerWallet`](../../Assets/Scripts/Player/PlayerWallet.cs)
+- Inventory·Equipment·QuickSlot 소유권 분리: [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs), [`EquipmentManager`](../../Assets/Scripts/Managers/EquipmentManager.cs), [`QuickSlotManager`](../../Assets/Scripts/Managers/QuickSlotManager.cs)
 
-## Runtime Performance
+<a id=runtime-performance></a>
+## 런타임 성능
 
-### Object Pooling
+### 오브젝트 풀링 (Object Pooling)
 
-#### Problem
+#### 문제
 
-Enemy, projectile, and VFX-style runtime objects can be created and removed repeatedly during combat. Repeated `Instantiate` and `Destroy` paths are undesirable on mobile because they add allocation and object lifecycle pressure during active gameplay.
+전투 중 적, 투사체, VFX 오브젝트가 반복적으로 생성·제거됩니다. 모바일 환경에서 반복적인 `Instantiate`와 `Destroy`는 할당과 생명주기 처리 부담을 전투 중에 집중시킬 수 있습니다.
 
-#### Observation
+#### 관찰
 
-The public code routes reusable runtime objects through `poolId`-based pools. [`ObjectPoolManager`](../../Assets/Scripts/Managers/ObjectPoolManager.cs) keeps a `Queue<GameObject>` per pool and a prefab lookup table. [`PooledObject`](../../Assets/Scripts/Object/PooledObject.cs) stores the owning pool id so instances can return to the correct pool.
+공개 코드는 재사용 가능한 오브젝트를 `poolId` 기반 풀로 관리합니다. [`ObjectPoolManager`](../../Assets/Scripts/Managers/ObjectPoolManager.cs)는 풀마다 `Queue<GameObject>`와 prefab 정보를 보관하고, [`PooledObject`](../../Assets/Scripts/Object/PooledObject.cs)는 올바른 풀로 돌아가기 위한 id를 저장합니다.
 
-#### Change
+#### 변경
 
-`ObjectPoolManager.Spawn` reuses an inactive object when available, otherwise creates a new instance through the registered prefab. `Despawn` returns pooled objects by setting them inactive and enqueueing them. [`EnemySpawner`](../../Assets/Scripts/Enemy/EnemySpawner.cs) obtains enemies through the pool instead of directly instantiating enemy prefabs.
+`ObjectPoolManager.Spawn`은 비활성 인스턴스가 있으면 재사용하고, 없으면 등록된 prefab으로 생성합니다. `Despawn`은 오브젝트를 비활성화한 뒤 큐로 돌려보냅니다. [`EnemySpawner`](../../Assets/Scripts/Enemy/EnemySpawner.cs)는 적 prefab을 직접 생성하지 않고 풀에서 가져옵니다.
 
 ```mermaid
 flowchart LR
@@ -50,59 +51,47 @@ flowchart LR
     Return --> Pool
 ```
 
-#### Verification
+#### 검증
 
-The structure is verified in code: pool registration and queue reuse in [`ObjectPoolManager`](../../Assets/Scripts/Managers/ObjectPoolManager.cs), pool ownership in [`PooledObject`](../../Assets/Scripts/Object/PooledObject.cs), and pooled enemy spawning in [`EnemySpawner`](../../Assets/Scripts/Enemy/EnemySpawner.cs). No public profiler capture in this repository proves FPS, CPU ms, GC Alloc, GPU ms, memory, or frame-time improvement, so those numeric claims are intentionally excluded.
+풀 등록, 큐 재사용, 풀 소유 정보, 풀 기반 적 생성을 연결된 코드에서 확인했습니다. FPS, CPU ms, GC Alloc, GPU ms, 메모리, frame time 개선을 입증하는 공개 캡처는 없어 수치로 주장하지 않습니다.
 
 ### Enemy Multi-frame Scan
 
-#### Problem
+#### 문제
 
-Distance-based enemy activation should avoid scanning every enemy in one frame when many enemies exist. Splitting work with `checksPerFrame` is reasonable only if the scan eventually covers the full registered enemy set.
+등록된 적이 많을 때 전체 거리 검사를 한 프레임에 수행하면 작업이 집중될 수 있습니다. `checksPerFrame`으로 나누더라도 시작한 스캔은 전체 대상 목록을 끝까지 처리해야 합니다.
 
-#### Observation
+#### 관찰
 
-The current public [`EnemyCullingManager`](../../Assets/Scripts/Managers/EnemyCullingManager.cs) compares player movement against `updateThreshold`, updates `_lastCheckedPlayerPos`, then processes only `checksPerFrame` entries.
+[`EnemyCullingManager`](../../Assets/Scripts/Managers/EnemyCullingManager.cs)는 이동량이 `updateThreshold`를 넘으면 `BeginScan`을 호출합니다. 이때 `_scanPlayerPosition`과 `_scanTargetCount`를 캡처하고 `_scanInProgress`를 활성화합니다.
 
-#### Change
+#### 변경
 
-Current public code applies partial per-frame checks with `_currentIndex`, `checksPerFrame`, `sqrMagnitude`, and `cullDistance`.
+`ProcessScanChunk`는 `_currentIndex`가 `_scanTargetCount`에 도달할 때까지 frame마다 최대 `checksPerFrame`개를 처리합니다. null 항목도 `_currentIndex`와 `processedCount`를 증가시켜 scan slot을 소비합니다. 현재 scan이 끝난 뒤 다음 Update에서 새 이동량을 검사하므로, scan 도중의 이동은 다음 scan에 반영됩니다.
 
-The newer full-scan fix is **not present** in the public code. The expected corrected design is:
+#### 검증
 
-- Start a scan when player movement exceeds the threshold.
-- Capture the scan target position/state for that started scan.
-- Continue the scan with a persistent cursor across frames until the whole target enemy set is processed.
-- Let null entries consume scan slots so scan progress remains bounded and predictable.
-- If the player moves again while a scan is active, queue/start the next scan only after the current scan completes.
-
-#### Verification
-
-Code inspection confirms the historical bug is still possible in this public subset: `_lastCheckedPlayerPos` is updated before the first `checksPerFrame` chunk finishes, and if the player stops moving, remaining enemies are not scanned until movement crosses the threshold again. This repository should not claim the full-scan fix as completed until [`EnemyCullingManager`](../../Assets/Scripts/Managers/EnemyCullingManager.cs) is updated or synced from a verified source.
+코드에서 scan이 진행 중이면 이동 여부와 관계없이 `ProcessScanChunk`가 계속 호출되는 흐름을 확인했습니다. `EnemyCulling.ScanChunk` ProfilerMarker와 Development Build 진단 값으로 scan index, 진행 여부, 완료 cycle, 활성 Enemy 수를 확인할 수 있습니다.
 
 ### Grid-based Tile Activation
 
-#### Problem
+#### 문제
 
-Activating nearby map tiles by distance can reduce active scene objects, but tiles that leave the active radius must also be disabled. Checking only the new candidate region can leave previously active tiles accumulated as the player moves.
+거리 기준으로 주변 map tile만 활성화하더라도, 활성 반경을 벗어난 tile을 명시적으로 꺼야 합니다. 새 후보 영역만 검사하면 플레이어 이동 중 이전 tile이 누적될 수 있습니다.
 
-#### Observation
+#### 관찰
 
-Historical debugging observed active tile counts:
+과거 수정 전 디버깅에서는 다음 활성 tile 수가 관찰되었습니다.
 
 ```text
 Active Tiles: 4 → 9 → 14 → 15
 ```
 
-This is pre-fix problem evidence. It is **not** a post-fix measurement.
+이는 **수정 전 문제 기록**이며 수정 후 측정값이 아닙니다. 현재 [`MapManager`](../../Assets/Scripts/Managers/MapManager.cs)는 플레이어 Grid 좌표와 tile 단위 반경을 계산하고 거리 제곱으로 `_desiredActiveTiles`를 구성합니다.
 
-The current public [`MapManager`](../../Assets/Scripts/Managers/MapManager.cs) computes the player's tile coordinate, derives a radius in tile units, loops candidate x/y ranges, uses squared distance, and toggles candidate tiles. It does not track the old active set separately.
+#### 변경
 
-#### Change
-
-Current public code implements a local candidate-region activation check with `sqrMagnitude`. The desired/current reconciliation design is **not present** in this public subset.
-
-The intended Grid Active Set design is:
+현재 코드는 `sqrMagnitude`로 후보를 계산하고 다음 Grid Active Set 조정을 수행합니다.
 
 ```mermaid
 flowchart LR
@@ -115,39 +104,39 @@ flowchart LR
     Disable --> NewCurrent
 ```
 
-#### Verification
+#### 검증
 
-Code inspection verifies `activeRadius * activeRadius` and `sqrMagnitude` are used in [`MapManager`](../../Assets/Scripts/Managers/MapManager.cs). Code inspection also verifies no `desiredActiveTiles`, `currentActiveTiles`, `HashSet<Tile>`, diagnostic Gizmos, or `ProfilerMarker` exists in the current public file. No post-fix active tile counts are available in this repository.
+코드에서 `activeRadius * activeRadius`, `sqrMagnitude`, `_desiredActiveTiles`, `_activeTiles`의 차집합 처리와 집합 교체를 확인했습니다. `MapManager.UpdateActiveTiles` ProfilerMarker, Development Build 진단 값, Scene Gizmo로 활성 tile·반경·현재 Grid를 확인할 수 있습니다. 수정 후 정량 tile 수는 기록하지 않습니다.
 
-### Enemy Spawn Work Distribution
+### 적 생성 작업 분산 (Enemy Spawn Work Distribution)
 
-#### Problem
+#### 문제
 
-Initial enemy placement after map generation can touch many tiles and spawn points. Running all placement work in one frame risks concentrating work at dungeon entry.
+맵 생성 직후 모든 tile과 spawn point를 한 프레임에 처리하면 dungeon 진입 시점에 작업이 집중될 수 있습니다.
 
-#### Observation
+#### 관찰
 
-[`EnemySpawner.CoSpawnAllEnemies`](../../Assets/Scripts/Enemy/EnemySpawner.cs) waits for the frame after NavMesh generation, loops tiles and spawn points, and then yields after each tile.
+[`EnemySpawner.CoSpawnAllEnemies`](../../Assets/Scripts/Enemy/EnemySpawner.cs)는 NavMesh 생성 다음 프레임부터 tile과 spawn point를 순회하고 tile마다 `yield`합니다.
 
-#### Change
+#### 변경
 
-Enemy placement is distributed with `yield return null` after each tile. Spawned enemies are obtained from [`ObjectPoolManager`](../../Assets/Scripts/Managers/ObjectPoolManager.cs), then initialized with NavMesh placement, `OnSpawnInitialize`, and wander data.
+각 tile 처리 후 `yield return null`로 작업을 분산합니다. 적은 [`ObjectPoolManager`](../../Assets/Scripts/Managers/ObjectPoolManager.cs)에서 가져온 뒤 NavMesh 배치, `OnSpawnInitialize`, wander data 설정 순서로 초기화됩니다.
 
-#### Verification
+#### 검증
 
-The coroutine and per-tile `yield return null` are present in [`EnemySpawner.CoSpawnAllEnemies`](../../Assets/Scripts/Enemy/EnemySpawner.cs). No timing measurements are present in this repository, so this is documented as work distribution evidence rather than a quantified loading improvement.
+코루틴과 tile 단위 `yield return null`을 확인했습니다. timing 측정값은 없어 정량적 로딩 개선이 아니라 작업 분산 구현 근거로 설명합니다.
 
-### Event-driven UI
+### 이벤트 기반 UI (Event-driven UI)
 
-#### Problem
+#### 문제
 
-Inventory, equipment, quick slot, mana, timer, health, and gold UI can become expensive or fragile if every panel polls runtime state every frame.
+UI가 매 프레임 상태를 polling하면 불필요한 갱신과 동기화 복잡도가 생길 수 있습니다.
 
-#### Observation
+#### 관찰
 
-The public code exposes state-change events:
+공개 코드에서 다음 상태 변경 이벤트를 확인할 수 있습니다.
 
-| Event | Evidence |
+| 이벤트 | 코드 근거 |
 |---|---|
 | `OnInventoryChanged` | [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs) |
 | `OnItemMoved` / `OnItemRemoved` | [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs), [`QuickSlotManager`](../../Assets/Scripts/Managers/QuickSlotManager.cs) |
@@ -156,187 +145,187 @@ The public code exposes state-change events:
 | `OnGoldChanged` | [`PlayerWallet`](../../Assets/Scripts/Player/PlayerWallet.cs), [`LobbyUIManager`](../../Assets/Scripts/UI/LobbyUIManager.cs) |
 | `OnKilled` | [`PlayerHealth`](../../Assets/Scripts/Player/PlayerHealth.cs), [`EnemyHealth`](../../Assets/Scripts/Enemy/EnemyHealth.cs) |
 
-#### Change
+#### 변경
 
-UI refreshes are triggered by state changes where this code path is implemented, such as inventory changes, quick slot rebinding after item movement/removal, mana display updates, one-second timer updates, and gold UI refresh.
+Inventory 변경, item 이동·제거 후 QuickSlot 재연결, Mana 표시, 1초 단위 Timer, Gold UI 갱신은 상태 이벤트를 사용합니다.
 
-#### Verification
+#### 검증
 
-Event declarations, invocations, and subscriptions are present in the linked source files. This section does not claim that every UI element in the game is event-driven; it documents the supported paths visible in the public subset.
+연결된 소스에서 이벤트 선언·호출·구독을 확인했습니다. 모든 UI가 이벤트 기반이라고 주장하지 않고 공개 코드에서 확인되는 경로만 설명합니다.
 
-## Rendering Profiling
+<a id=rendering-profiling></a>
+## 렌더링 프로파일링 (Rendering Profiling)
 
-The rendering validation workflow was:
+렌더링 검증은 다음 순서로 진행했습니다.
 
 ```text
-Profiler -> Frame Debugger -> Controlled A/B Test -> Apply only where verified
+Profiler → Frame Debugger → 통제된 A/B 테스트 → 검증된 대상에만 적용
 ```
 
-Known portfolio InGame baseline measurement, recorded outside this public repository:
+다음 InGame baseline은 **현재 공개 저장소 외부에서 기록된 측정값**입니다. 이를 독립적으로 확인할 원본 캡처는 저장소에 없습니다.
 
-The current repository does not contain the source capture needed to independently verify these values.
-
-| Metric | Value |
+| 지표 | 기록값 |
 |---|---:|
 | Batches | 63 |
 | SetPass | 37 |
 | Triangles | 24.1k |
 | Vertices | 48.7k |
 
-Controlled GPU Instancing benchmark conditions:
+GPU Instancing 통제 benchmark 조건:
 
-- 64 `MeshRenderer` objects
-- Same Mesh / Material conditions
+- `MeshRenderer` 64개
+- 동일 Mesh / Material
 - Windows Editor / DX12
 
-Result:
+결과:
 
 ```text
 동일 Mesh/Material 조건의 64 MeshRenderer 테스트 환경에서
 GPU Instancing 적용 전후 Batches 67 → 4를 확인했습니다.
 ```
 
-This is a controlled benchmark result recorded outside this public repository. It is **not** documented as the whole game becoming `67 → 4` batches. The current repository does not contain the rendering screenshots for profiler baseline, Frame Debugger, instancing off, or instancing on.
+공개 저장소 외부에서 기록한 통제 benchmark 결과이며, 게임 전체 Batches가 `67 → 4`가 되었다는 뜻이 아닙니다. Profiler baseline, Frame Debugger, Instancing off/on 원본 캡처는 현재 저장소에 없습니다.
 
-## Troubleshooting
+<a id=troubleshooting></a>
+## 트러블슈팅 (Troubleshooting)
 
-### 1. Enemy multi-frame scan stopping after the first chunk
+<a id=1-enemy-multi-frame-scan-stopping-after-the-first-chunk></a>
+### 1. 첫 chunk 이후 멈추던 Enemy Multi-frame Scan
 
-#### Problem
+#### 문제
 
-`checksPerFrame` was introduced to split enemy distance checks, but only the first chunk was processed after movement was detected.
+`checksPerFrame`을 도입한 초기 구현에서는 이동 감지 후 첫 chunk만 처리되는 문제가 있었습니다.
 
-#### Observation / Diagnosis
+#### 관찰 / 진단
 
-Current public code updates `_lastCheckedPlayerPos` before the scan has covered every registered enemy. The scan only advances while movement exceeds `updateThreshold`.
+이전 구현은 전체 적을 확인하기 전에 `_lastCheckedPlayerPos`를 갱신했으며, 플레이어가 멈추면 남은 chunk가 실행되지 않았습니다.
 
-#### Root Cause
+#### 근본 원인
 
-Movement detection and scan progress are coupled. Once the player's position is recorded as checked, stopping movement prevents the remaining chunks from running.
+이동 감지와 scan 진행 상태가 결합되어 있었습니다.
 
-#### Fix
+#### 수정
 
-The required fix is to decouple scan lifetime from movement detection by keeping active scan state and a cursor until the complete target set is processed. This fix is **not present** in the public code.
+`BeginScan`에서 기준 위치와 대상 수를 캡처하고, `_scanInProgress`와 `_currentIndex`를 유지해 전체 대상 처리가 끝날 때까지 `ProcessScanChunk`를 계속 실행하도록 분리했습니다.
 
-#### Verification
+#### 검증
 
-Verified by inspecting [`EnemyCullingManager`](../../Assets/Scripts/Managers/EnemyCullingManager.cs): `_lastCheckedPlayerPos` is assigned before the `for (int i = 0; i < checksPerFrame; i++)` chunk, and no active full-scan state exists.
+[`EnemyCullingManager`](../../Assets/Scripts/Managers/EnemyCullingManager.cs)에서 scan 진행 중에는 이동 여부와 관계없이 chunk가 계속 처리되는 흐름을 확인했습니다. ProfilerMarker와 Development Build 진단 값도 포함되어 있습니다.
 
-### 2. Grid active tiles accumulating during movement
+<a id=2-grid-active-tiles-accumulating-during-movement></a>
+### 2. 이동 중 누적되던 Grid Active Tiles
 
-#### Problem
+#### 문제
 
-Tiles can accumulate if the update loop only checks the new candidate region and does not explicitly disable tiles that left the desired active area.
+새 후보 영역만 검사하고 원하는 활성 영역을 벗어난 tile을 끄지 않으면 활성 tile이 누적될 수 있었습니다.
 
-#### Observation / Diagnosis
+#### 관찰 / 진단
 
-Historical pre-fix observation recorded active tile counts: `4 → 9 → 14 → 15`.
+수정 전 활성 tile 수가 `4 → 9 → 14 → 15`로 증가하는 현상을 확인했습니다.
 
-#### Root Cause
+#### 근본 원인
 
-The current public `MapManager` does not store `currentActiveTiles`, so it has no direct `current - desired` operation to disable tiles that were active in a previous region but are outside the new region.
+이전 구현은 현재 활성 집합을 별도로 보관하지 않아 `current - desired`에 해당하는 비활성화 처리를 할 수 없었습니다.
 
-#### Fix
+#### 수정
 
-The intended fix is a Grid Active Set reconciliation:
+`_desiredActiveTiles`와 `_activeTiles`를 분리하고 다음처럼 조정합니다.
 
 ```text
-desiredActiveTiles = tiles currently wanted around the player
-currentActiveTiles - desiredActiveTiles => disable
-desiredActiveTiles - currentActiveTiles => enable
-currentActiveTiles = desiredActiveTiles
+desiredActiveTiles = 현재 플레이어 주변에서 필요한 tile
+activeTiles - desiredActiveTiles => 비활성화
+desiredActiveTiles - activeTiles => 활성화
+activeTiles = desiredActiveTiles
 ```
 
-This reconciliation is **not present** in the current public code.
+조정 후 두 HashSet을 교체해 다음 갱신에서 재사용합니다.
 
-#### Verification
+#### 검증
 
-Verified by inspecting [`MapManager`](../../Assets/Scripts/Managers/MapManager.cs): the file uses candidate loops and squared distance checks, but has no desired/current active-set fields and no Gizmo or ProfilerMarker diagnostics.
+[`MapManager`](../../Assets/Scripts/Managers/MapManager.cs)에서 차집합 처리, 거리 제곱 비교, `MapManager.UpdateActiveTiles` ProfilerMarker, Development Build 진단 값, Scene Gizmo를 확인했습니다. `4 → 9 → 14 → 15`는 수정 전 기록이며 수정 후 수치로 사용하지 않습니다.
 
-### 3. Pooled enemies retaining previous lifecycle state
+### 3. 이전 생명주기 상태가 남는 풀링 적
 
-#### Problem
+#### 문제
 
-Reusing enemy GameObjects can preserve health, collider, death flags, behavior variables, player target, and patrol references from a previous lifecycle.
+Enemy GameObject를 재사용하면 이전 생명주기의 체력, collider, 사망 flag, behavior variable, target, patrol reference가 남을 수 있습니다.
 
-#### Observation / Diagnosis
+#### 관찰 / 진단
 
-Pooled enemies are obtained through [`EnemySpawner`](../../Assets/Scripts/Enemy/EnemySpawner.cs). Without an explicit spawn reset, death handling or AI state could carry into the next use.
+적은 [`EnemySpawner`](../../Assets/Scripts/Enemy/EnemySpawner.cs)를 통해 풀에서 가져오므로 명시적 reset이 없으면 이전 사망 처리와 AI 상태가 다음 사용으로 이어집니다.
 
-#### Root Cause
+#### 근본 원인
 
-Pooling avoids object destruction, so Unity component fields remain on the reused GameObject unless reset manually.
+풀링은 GameObject를 파괴하지 않아 component field가 자동 초기화되지 않습니다.
 
-#### Fix
+#### 수정
 
-[`EnemyController.OnSpawnInitialize`](../../Assets/Scripts/Enemy/EnemyController.cs) resets health, collider trigger state, behavior graph variables, enemy state, player target, detection references, patrol/wander data, and `_deathProcessed`.
+[`EnemyController.OnSpawnInitialize`](../../Assets/Scripts/Enemy/EnemyController.cs)는 체력, collider trigger, behavior graph variable, enemy state, target, 감지 reference, patrol/wander data, `_deathProcessed`를 초기화합니다.
 
-#### Verification
+#### 검증
 
-Verified in [`EnemySpawner.PlaceEnemyOnNavMesh`](../../Assets/Scripts/Enemy/EnemySpawner.cs), which calls `controller.OnSpawnInitialize()` before setting wander data, and in [`EnemyController.OnSpawnInitialize`](../../Assets/Scripts/Enemy/EnemyController.cs), which contains the reset logic.
+[`EnemySpawner.PlaceEnemyOnNavMesh`](../../Assets/Scripts/Enemy/EnemySpawner.cs)의 호출 순서와 [`EnemyController.OnSpawnInitialize`](../../Assets/Scripts/Enemy/EnemyController.cs)의 reset 로직을 확인했습니다.
 
-### 4. Inventory / Equipment / QuickSlot ownership problem
+### 4. Inventory / Equipment / QuickSlot 소유권 문제
 
-#### Problem
+#### 문제
 
-A single generic item slot could not safely own all inventory, equipment, quick slot, shop, and chest behavior because those slots have different ownership rules.
+각 slot 유형은 소유권 규칙이 달라 하나의 범용 item slot이 Inventory, Equipment, QuickSlot, Shop, Chest 역할을 모두 안전하게 소유하기 어렵습니다.
 
-#### Observation / Diagnosis
+#### 관찰 / 진단
 
-Inventory slots own `ItemInstance` data and stack/transfer rules. Equipment slots validate equip type and affect player stats. Quick slots should not own item data; they should reference the item instance that remains in inventory.
+Inventory는 `ItemInstance`와 stack/transfer 규칙을 소유하고, Equipment는 장착 상태와 stat을 관리하며, QuickSlot은 Inventory의 item instance를 참조해야 합니다.
 
-#### Root Cause
+#### 근본 원인
 
-Using slot index as ownership identity is fragile. Item movement or sorting can make a quick slot point to the wrong item if it tracks only an inventory index.
+slot index만 추적하면 item 이동이나 정렬 후 QuickSlot이 다른 item을 가리킬 수 있습니다.
 
-#### Fix
+#### 수정
 
-The public code separates responsibilities:
+공개 코드는 책임을 다음처럼 분리합니다.
 
-- [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs) owns item instances and inventory operations.
-- [`EquipmentManager`](../../Assets/Scripts/Managers/EquipmentManager.cs) owns equipment slot state and stat application/removal.
-- [`QuickSlot`](../../Assets/Scripts/UI/QuickSlot.cs) stores a referenced `Guid`.
-- [`QuickSlotManager`](../../Assets/Scripts/Managers/QuickSlotManager.cs) listens for item moved/removed events and refreshes or clears quick slot bindings.
+- [`InventoryManager`](../../Assets/Scripts/Managers/InventoryManager.cs): item instance와 Inventory 동작
+- [`EquipmentManager`](../../Assets/Scripts/Managers/EquipmentManager.cs): 장비 상태와 stat 적용·해제
+- [`QuickSlot`](../../Assets/Scripts/UI/QuickSlot.cs): 참조 대상 `Guid`
+- [`QuickSlotManager`](../../Assets/Scripts/Managers/QuickSlotManager.cs): 이동·제거 이벤트에 따른 연결 갱신
 
-#### Verification
+#### 검증
 
-Verified by source inspection of `ItemInstance.instanceId`, `OnItemMoved`, `OnItemRemoved`, `QuickSlot.referencedInstanceId`, and `QuickSlotManager.HandleItemMoved` / `HandleItemRemoved`.
+`ItemInstance.instanceId`, `OnItemMoved`, `OnItemRemoved`, `QuickSlot.referencedInstanceId`와 관련 handler를 확인했습니다.
 
-### 5. Limited tile assets vs replayable dungeon layout
+### 5. 제한된 Tile Asset과 반복 가능한 Dungeon 배치
 
-#### Problem
+#### 문제
 
-Fully procedural map generation would require more time for connectivity, collision, NavMesh, object placement, and playability validation than the solo schedule allowed. A single fixed map would reduce replay variation.
+완전 절차 생성은 연결성, collision, NavMesh, 배치, playability 검증 비용이 크고, 하나의 고정 map은 반복 변화를 줄입니다.
 
-#### Observation / Diagnosis
+#### 관찰 / 진단
 
-The public [`MapManager`](../../Assets/Scripts/Managers/MapManager.cs) generates a tile grid from verified prefabs, assigns area tiers by grid distance, randomizes tile prefab selection and 90-degree rotations, assigns escape/item tiles, builds NavMesh, and then starts enemy spawning.
+[`MapManager`](../../Assets/Scripts/Managers/MapManager.cs)는 검증된 prefab으로 grid를 만들고 거리 기반 tier, prefab 선택, 90도 단위 회전, escape/item tile 배정 후 NavMesh와 적 생성을 진행합니다.
 
-#### Root Cause
+#### 근본 원인
 
-The project needed replay variation while keeping implementation and validation cost bounded.
+솔로 개발 일정 안에서 구현·검증 비용을 통제하면서 반복 플레이 변화를 확보해야 했습니다.
 
-#### Fix
+#### 수정
 
-Use a grid of verified tile prefabs with controlled randomization: random field tile prefab per non-boss tile, random rotation from `0`, `90`, `180`, `270` degrees, tier assignment from grid distance, escape/item tile assignment from candidate lists, and NavMesh build before enemy spawn distribution.
+검증된 tile prefab과 제한된 무작위성, 거리 기반 tier, 후보 기반 특수 tile 배정, NavMesh 생성 후 적 배치 순서를 사용했습니다.
 
-#### Verification
+#### 검증
 
-Verified in [`MapManager.CreateTiles`](../../Assets/Scripts/Managers/MapManager.cs), tile type/tier initialization, NavMesh build call, and [`EnemySpawner.CoSpawnAllEnemies`](../../Assets/Scripts/Enemy/EnemySpawner.cs).
+[`MapManager.CreateTiles`](../../Assets/Scripts/Managers/MapManager.cs)의 tile 생성·tier 초기화·NavMesh build와 [`EnemySpawner.CoSpawnAllEnemies`](../../Assets/Scripts/Enemy/EnemySpawner.cs)의 실행 순서를 확인했습니다.
 
-## Claims Deliberately Not Included
+## 의도적으로 포함하지 않은 주장
 
-- No claim that Google Play production release is complete or that the game is live on Google Play.
-- No claim that the public code includes the fixed Enemy Multi-frame Scan cursor implementation.
-- No claim that the public code includes desired/current Grid Active Set reconciliation.
-- No post-fix active tile counts.
-- No FPS, GC Alloc, CPU ms, GPU ms, memory, or frame-time improvements.
-- No claim that the whole game achieved `67 → 4` batches; that number is only the controlled GPU Instancing benchmark.
-- No claim that rendering profiler screenshots are present in this repository.
+- Google Play 프로덕션 출시 완료 또는 현재 스토어 서비스 중
+- 수정 후 활성 tile 수
+- FPS, GC Alloc, CPU ms, GPU ms, 메모리, frame time 개선 수치
+- 게임 전체가 `67 → 4` Batches를 달성했다는 주장
+- 렌더링 Profiler 캡처가 현재 저장소에 존재한다는 주장
 
-## Screenshots Still Needed
+## 추가로 필요한 스크린샷
 
-Public-safe performance screenshots should be added if available:
+실제 공개 가능한 성능 캡처가 있다면 다음 경로에 추가할 수 있습니다.
 
 - `Docs/screenshots/performance/runtime-grid-activation.png`
 - `Docs/screenshots/performance/profiler-baseline.png`

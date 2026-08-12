@@ -20,7 +20,7 @@ public class EquipSlot : ItemSlot
         var drag = eventData.pointerDrag?.GetComponent<ItemDragHandler>();
         if (drag == null) return;
 
-        // 인벤토리 -> 장착
+        // 인벤토리 → 장착
         if (drag.sourceSlot is ItemSlot invSlot && !(drag.sourceSlot is EquipSlot))
         {
             TryEquipFromInventory(invSlot, drag);
@@ -28,7 +28,7 @@ public class EquipSlot : ItemSlot
             return;
         }
 
-        // 장비 -> 장비
+        // 장비 → 장비
         if (drag.sourceSlot is EquipSlot equipSlot)
         {
             TrySwapEquip(equipSlot, drag);
@@ -105,7 +105,8 @@ public class EquipSlot : ItemSlot
             // 부모 클래스의 Refresh 호출
             base.Refresh(slotData);
 
-        // 장착 슬롯 특수 처리
+        // 장착 슬롯 특수 처리 (예: 테두리 색상 변경 등)
+        // 필요시 여기에 추가 로직 구현
     }
 }
 

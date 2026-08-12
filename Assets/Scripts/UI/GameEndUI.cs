@@ -38,6 +38,7 @@ public class GameEndUI : MonoBehaviour
     private void OnEnable()
     {
         RewardButtonSwap(true);
+        // 광고 핸들러의 이벤트 구독 (AdSDK를 통해 접근한다고 가정)
         AdSDK.Instance.RewardedAdHandler.OnRewardGranted += HandleRewardEffect;
     }
 
@@ -151,7 +152,7 @@ public class GameEndUI : MonoBehaviour
         }
         else
         {
-            // 사망 시: 부활 연출
+            // 2. 사망 시: 부활 연출
             resultText.text = "REVIVED";
             resultText.color = Color.green;
             rewardAdsBtnText.text = "부활";
