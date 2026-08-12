@@ -1,11 +1,10 @@
-<div align=center>
+<div align="center">
 
 # ASH:BORN
 
 ### Unity 모바일 탑다운 액션 게임 · 1인 개발
 
 전투·성장·파밍을 거쳐 제한 시간 안에 탈출하는 모바일 탑다운 액션 게임입니다.
-이 저장소는 실제 프로젝트의 **공개 가능한 Unity 클라이언트 코드와 기술 문서**만 선별한 포트폴리오입니다.
 
 ![Unity 6](https://img.shields.io/badge/Unity-6-000000)
 ![CSharp](https://img.shields.io/badge/CSharp-Client-512BD4)
@@ -16,11 +15,19 @@
 
 **Google Play 비공개 테스트 완료 · 프로덕션 출시 심사 진행**
 
-[WebGL 데모](https://lookiesr.itch.io/ashborn) · [게임플레이 시스템](#gameplay-systems) · [클라이언트 구조](#client-architecture) · [런타임 성능](#runtime-performance) · [렌더링 프로파일링](#rendering-profiling) · [트러블슈팅](#troubleshooting) · [코드 맵](#code-map) · [상세 기술 문서](Docs/technical/README.md)
+[WebGL 데모](https://lookiesr.itch.io/ashborn) ·
+[게임플레이 시스템](#gameplay-systems) ·
+[클라이언트 구조](#client-architecture) ·
+[런타임 성능](#runtime-performance) ·
+[렌더링 프로파일링](#rendering-profiling) ·
+[트러블슈팅](#troubleshooting) ·
+[코드 맵](#code-map)
 
 ![ASH:BORN combat and skill progression gameplay](Docs/screenshots/portfolio/composite/combat-flow.jpg)
 
 </div>
+
+이 저장소는 ASH:BORN에서 직접 구현한 **Unity 클라이언트 코드와 기술 문서**를 정리한 포트폴리오입니다. 상용 에셋과 배포 관련 파일은 제외되어 있으며, 실제 플레이는 WebGL 데모에서 확인할 수 있습니다.
 
 ## 프로젝트 한눈에 보기
 
@@ -30,150 +37,185 @@
 | 주요 시스템 | Combat, Enemy AI, Skill, Inventory, Equipment, QuickSlot, Save, UI |
 | 기술·빌드 | Unity 6 (6000.2.4f1), C#, Android, WebGL |
 | 출시 상태 | Google Play 비공개 테스트 완료 · 프로덕션 출시 심사 진행 |
-| 공개 범위 | C# 코드·설계 문서·직접 캡처한 화면; 라이선스 에셋과 배포 설정 제외 |
 
-> WebGL 데모는 브라우저에서 실행할 수 있습니다. 이 저장소는 라이선스 에셋·씬·프리팹을 제외한 코드 포트폴리오이므로 단독 실행용 전체 Unity 프로젝트가 아닙니다.
+## 이 프로젝트에서 보여주고 싶은 것
 
-## 핵심 엔지니어링
+### 01. 게임플레이 시스템을 끝까지 연결한 경험
 
-### 01 게임플레이 시스템
+전투와 적 AI, 스킬 성장, 아이템 파밍, 인벤토리·장비, 저장, 탈출과 결과 정산까지 하나의 플레이 루프로 구현했습니다.
 
-Combat과 Enemy AI, 런타임 Skill 생성·레벨업, Inventory·Equipment·QuickSlot, JSON Save, 탈출·사망 정산을 하나의 플레이 루프로 연결했습니다.
-[EnemyController](Assets/Scripts/Enemy/EnemyController.cs) · [SkillManager](Assets/Scripts/Managers/SkillManager.cs) · [InventoryManager](Assets/Scripts/Managers/InventoryManager.cs) · [PlayerDataManager](Assets/Scripts/Managers/PlayerDataManager.cs)
+[EnemyController](Assets/Scripts/Enemy/EnemyController.cs) ·
+[SkillManager](Assets/Scripts/Managers/SkillManager.cs) ·
+[InventoryManager](Assets/Scripts/Managers/InventoryManager.cs) ·
+[PlayerDataManager](Assets/Scripts/Managers/PlayerDataManager.cs)
 
-### 02 클라이언트 구조
+### 02. 런타임 비용을 줄이면서 생긴 문제까지 다시 고친 경험
 
-정적 원형 데이터와 런타임 상태를 분리하고 게임 흐름·도메인 규칙·UI 책임을 나눴습니다. Inventory는 실제 아이템, Equipment는 장착 상태, QuickSlot은 GUID 참조를 관리합니다.
-[EquipmentManager](Assets/Scripts/Managers/EquipmentManager.cs) · [QuickSlotManager](Assets/Scripts/Managers/QuickSlotManager.cs) · [Architecture Diagrams](Docs/architecture/README.md)
+Object Pooling, Enemy 거리 검사 분할, Grid 기반 Tile 활성화를 적용했습니다. 단순히 기능을 넣는 데서 끝내지 않고, 분할 Scan이 중간에 멈추거나 Active Tile이 누적되는 문제를 실제 플레이 중 확인해 다시 수정했습니다.
 
-### 03 런타임 성능
+[ObjectPoolManager](Assets/Scripts/Managers/ObjectPoolManager.cs) ·
+[EnemyCullingManager](Assets/Scripts/Managers/EnemyCullingManager.cs) ·
+[MapManager](Assets/Scripts/Managers/MapManager.cs)
 
-Enemy·Projectile·VFX 재사용, 전체 대상 처리를 보장하는 Enemy 거리 검사 분할, Grid Active Set 조정, Coroutine 기반 Spawn 분산, 이벤트 기반 UI 갱신을 적용했습니다.
-[ObjectPoolManager](Assets/Scripts/Managers/ObjectPoolManager.cs) · [EnemyCullingManager](Assets/Scripts/Managers/EnemyCullingManager.cs) · [MapManager](Assets/Scripts/Managers/MapManager.cs) · [EnemySpawner](Assets/Scripts/Enemy/EnemySpawner.cs)
+### 03. Profiler로 확인하고, 별도 테스트에서 적용 조건을 검증한 경험
 
-### 04 렌더링 프로파일링
+Profiler와 Frame Debugger로 실제 InGame 렌더링 상태를 확인하고, GPU Instancing은 별도 Benchmark Scene에서 동일 Mesh/Material 조건으로 A/B 테스트했습니다.
 
-Profiler → Frame Debugger → 통제된 A/B 테스트 순서로 확인했습니다. InGame baseline과 64 MeshRenderer GPU Instancing benchmark를 분리해 기록합니다.
+[렌더링 프로파일링](#rendering-profiling) ·
+[상세 기술 문서](Docs/technical/README.md)
 
-### 05 트러블슈팅
-
-분할 Scan, Grid Active Set, 풀링 lifecycle, item ownership, 제한된 Tile 에셋의 재사용성을 같은 진단 형식으로 기록했습니다.
-[상세 트러블슈팅](Docs/technical/README.md#troubleshooting)
-
-<a id=gameplay-systems></a>
+<a id="gameplay-systems"></a>
 ## 게임플레이 시스템
 
 ![ASH:BORN chest interaction and inventory transfer flow](Docs/screenshots/portfolio/composite/interaction-flow.jpg)
 
-| 플레이 경험 | 구현 책임 | 코드 증거 |
+| 플레이 경험 | 구현 내용 | 코드 |
 |---|---|---|
-| Combat·Enemy AI | 상태·피해 lifecycle과 탐지·이동·공격 행동 구성 | [Player](Assets/Scripts/Player/Player.cs), [EnemyController](Assets/Scripts/Enemy/EnemyController.cs), [Enemy Nodes](Assets/Scripts/Enemy/Node) |
-| Skill | ScriptableObject에서 ISkill 런타임 생성, 레벨·마나 관리 | [SkillManager](Assets/Scripts/Managers/SkillManager.cs), [ISkill](Assets/Scripts/Interface/ISkill.cs) |
-| Item | 실제 소유, 장착 상태, GUID 참조 분리 | [InventoryManager](Assets/Scripts/Managers/InventoryManager.cs), [EquipmentManager](Assets/Scripts/Managers/EquipmentManager.cs), [QuickSlotManager](Assets/Scripts/Managers/QuickSlotManager.cs) |
-| Save | 골드·아이템·장비·퀵슬롯·영구 성장 JSON 저장 | [PlayerDataManager](Assets/Scripts/Managers/PlayerDataManager.cs), [PlayerWallet](Assets/Scripts/Player/PlayerWallet.cs) |
-| 상호작용·탈출 | 공통 계약과 결과 흐름 | [IInteractable](Assets/Scripts/Interface/IInteractable.cs), [ChestInteractable](Assets/Scripts/Object/ChestInteractable.cs), [EscapePortal3D](Assets/Scripts/Object/EscapePortal.cs) |
+| Combat · Enemy AI | 플레이어 상태와 피해 처리, 적 탐지·이동·공격 행동 구성 | [Player](Assets/Scripts/Player/Player.cs), [EnemyController](Assets/Scripts/Enemy/EnemyController.cs), [Enemy Nodes](Assets/Scripts/Enemy/Node) |
+| Skill | ScriptableObject 데이터에서 `ISkill` 런타임 생성, 레벨·마나 관리 | [SkillManager](Assets/Scripts/Managers/SkillManager.cs), [ISkill](Assets/Scripts/Interface/ISkill.cs) |
+| Item | Inventory는 실제 아이템, Equipment는 장착 상태, QuickSlot은 GUID 참조를 관리 | [InventoryManager](Assets/Scripts/Managers/InventoryManager.cs), [EquipmentManager](Assets/Scripts/Managers/EquipmentManager.cs), [QuickSlotManager](Assets/Scripts/Managers/QuickSlotManager.cs) |
+| Save | 골드·아이템·장비·퀵슬롯·영구 성장 데이터를 JSON으로 저장 | [PlayerDataManager](Assets/Scripts/Managers/PlayerDataManager.cs), [PlayerWallet](Assets/Scripts/Player/PlayerWallet.cs) |
+| 상호작용 · 탈출 | 상호작용 계약과 상자, 탈출, 결과 흐름 연결 | [IInteractable](Assets/Scripts/Interface/IInteractable.cs), [ChestInteractable](Assets/Scripts/Object/ChestInteractable.cs), [EscapePortal3D](Assets/Scripts/Object/EscapePortal.cs) |
 
-<a id=client-architecture></a>
+<a id="client-architecture"></a>
 ## 클라이언트 구조
 
-- GameManager는 씬과 상위 상태, InGameManager는 한 번의 던전 세션을 관리합니다.
-- ItemDataSO와 GUID를 가진 런타임 ItemInstance를 분리합니다.
-- Inventory·Equipment·QuickSlot은 화면 모양이 아니라 소유권과 규칙으로 나눴습니다.
-- 주요 HUD·Inventory·QuickSlot은 변경 이벤트를 사용합니다. 일부 Equipment·Window 흐름은 명시적 refresh를 유지합니다.
+구조를 나눌 때는 **누가 상태를 소유하는지**를 기준으로 잡았습니다.
 
-[전체 Client·Item·Skill·Map Mermaid 다이어그램](Docs/architecture/README.md)
+- `GameManager`는 씬과 상위 게임 상태를 관리합니다.
+- `InGameManager`는 한 번의 던전 세션과 결과 흐름을 관리합니다.
+- `ItemDataSO`는 정적 원형 데이터, `ItemInstance`는 GUID를 가진 런타임 아이템입니다.
+- `Inventory`, `Equipment`, `QuickSlot`은 UI 모양이 아니라 실제 소유권과 규칙에 따라 분리했습니다.
+- HUD와 Inventory·QuickSlot의 주요 갱신은 상태 변경 이벤트를 사용합니다.
 
-<a id=runtime-performance></a>
+[전체 Client · Item · Skill · Map 다이어그램](Docs/architecture/README.md)
+
+<a id="runtime-performance"></a>
 ## 런타임 성능
 
-### A. 오브젝트 풀링 (Object Pooling)
+### 오브젝트 풀링
 
-**Problem →** Enemy·Projectile·VFX가 전투 중 반복 생성·파괴될 수 있었습니다.
-**Observation →** 생성 주기가 짧고 재사용 가능한 객체를 공통 풀 대상으로 분류했습니다.
-**Change →** poolId별 Queue, preload, Spawn/Despawn을 구성했습니다. Enemy 재사용 전 체력, Collider, Behavior Graph 변수, Target·탐지 참조, 사망 flag를 초기화합니다.
-**Verification →** 재사용·반환과 reset 호출 경로를 코드에서 추적했습니다. 전체 Instantiate/Destroy 제거 또는 정량 향상은 주장하지 않습니다.
+Enemy, Projectile, VFX처럼 전투 중 반복해서 쓰는 객체는 `ObjectPoolManager`에서 재사용합니다.
 
-[ObjectPoolManager](Assets/Scripts/Managers/ObjectPoolManager.cs) · [PooledObject](Assets/Scripts/Object/PooledObject.cs) · [EnemySpawner](Assets/Scripts/Enemy/EnemySpawner.cs) · [EnemyController](Assets/Scripts/Enemy/EnemyController.cs)
+적은 단순히 `SetActive(true)`만 해서 다시 쓰지 않습니다. 이전 전투의 체력, Collider, AI 상태, Target, 사망 처리 플래그가 남을 수 있기 때문에 `OnSpawnInitialize`에서 다시 사용할 상태를 명시적으로 초기화합니다.
 
-### B. Enemy Multi-frame Scan
+[ObjectPoolManager](Assets/Scripts/Managers/ObjectPoolManager.cs) ·
+[PooledObject](Assets/Scripts/Object/PooledObject.cs) ·
+[EnemySpawner](Assets/Scripts/Enemy/EnemySpawner.cs) ·
+[EnemyController](Assets/Scripts/Enemy/EnemyController.cs)
 
-**Problem →** 모든 Enemy의 거리 검사를 한 frame에 실행하면 작업이 집중될 수 있습니다.
-**Observation →** 플레이어 이동 임계값을 넘으면 스캔을 시작하고, `checksPerFrame` 단위로 검사량을 나눕니다.
-**Change →** 시작 위치 `_scanPlayerPosition`, 전체 대상 수 `_scanTargetCount`, 진행 상태 `_scanInProgress`, cursor `_currentIndex`를 유지해 전체 스캔이 끝날 때까지 여러 frame에 걸쳐 계속 처리합니다. null 항목도 처리 slot을 소비합니다.
-**Verification →** `EnemyCulling.ScanChunk` ProfilerMarker와 Development Build 진단 값으로 chunk 진행·완료 cycle·활성 Enemy 수를 확인할 수 있습니다.
+### Enemy Multi-frame Scan
 
-[EnemyCullingManager](Assets/Scripts/Managers/EnemyCullingManager.cs) · [상세 진단](Docs/technical/README.md#1-enemy-multi-frame-scan-stopping-after-the-first-chunk)
+적이 많아질수록 거리 검사가 한 프레임에 몰리는 것을 피하려고 `checksPerFrame` 단위로 나눠 검사하도록 만들었습니다.
 
-### C. Grid-based Tile Activation
+처음 구현에서는 여기서 문제가 생겼습니다. 첫 chunk를 처리한 뒤 플레이어의 마지막 위치를 바로 갱신했기 때문에, 플레이어가 멈추면 아직 검사하지 않은 Enemy가 남아도 다음 chunk가 실행되지 않았습니다.
 
-**Problem →** 맵 전체 대신 플레이어 주변 Tile을 활성화 판단 단위로 관리할 필요가 있었습니다.
-**Observation →** 이동 임계값, Grid 좌표, activeRadius / tileSize, 거리 제곱으로 후보를 계산합니다.
-**Change →** `_desiredActiveTiles`와 `_activeTiles`를 분리하고 `current - desired`는 비활성화, `desired - current`는 활성화한 뒤 집합을 교체합니다.
-**Verification →** `MapManager.UpdateActiveTiles` ProfilerMarker, Development Build 진단 값, Scene Gizmo에서 활성 Tile·반경·현재 Grid를 확인할 수 있습니다.
+```text
+플레이어 이동
+→ 첫 chunk 검사
+→ 마지막 위치 갱신
+→ 플레이어 정지
+→ 남은 Enemy 검사 중단
+```
 
-[MapManager](Assets/Scripts/Managers/MapManager.cs) · [Tile](Assets/Scripts/Map/Tile.cs) · [상세 진단](Docs/technical/README.md#2-grid-active-tiles-accumulating-during-movement)
+이동 감지와 현재 Scan의 진행 상태를 분리해, 한 번 시작한 Scan은 cursor가 전체 대상을 처리할 때까지 여러 프레임에 걸쳐 계속 진행하도록 바꿨습니다.
 
-### D. 적 생성 작업 분산
+`EnemyCulling.ScanChunk` ProfilerMarker와 Development Build 진단 값으로 진행 상태와 완료 cycle을 확인할 수 있습니다.
 
-CoSpawnAllEnemies는 NavMesh 준비 후 Tile 하나를 처리할 때마다 yield return null로 다음 frame에 이어갑니다. CPU 감소 수치는 기재하지 않습니다.
+[EnemyCullingManager](Assets/Scripts/Managers/EnemyCullingManager.cs) ·
+[상세 기록](Docs/technical/README.md#1-enemy-multi-frame-scan-stopping-after-the-first-chunk)
+
+### Grid-based Tile Activation
+
+플레이어를 이동시키며 디버그 값을 확인하던 중 Active Tiles가 다음처럼 계속 늘어나는 현상을 확인했습니다.
+
+```text
+4 → 9 → 14 → 15
+```
+
+의도는 플레이어 주변 Tile만 활성 상태로 유지하는 것이었지만, 기존 구현은 새 위치 주변의 Tile만 검사하고 **이전 위치에서 활성화된 Tile을 새 반경 밖에서 끄지 못하고 있었습니다.**
+
+그래서 현재 필요한 Tile과 이미 활성화된 Tile을 각각 `HashSet`으로 관리하도록 바꿨습니다.
+
+```text
+현재 활성 - 현재 필요 → Disable
+현재 필요 - 현재 활성 → Enable
+```
+
+Scene Gizmo에는 현재 Grid, 활성 반경, 활성 Tile을 표시해 이동하면서 상태를 바로 확인할 수 있게 했습니다. 위 `4 → 9 → 14 → 15`는 수정 전 문제를 확인했을 때의 기록입니다.
+
+[MapManager](Assets/Scripts/Managers/MapManager.cs) ·
+[Tile](Assets/Scripts/Map/Tile.cs) ·
+[상세 기록](Docs/technical/README.md#2-grid-active-tiles-accumulating-during-movement)
+
+### 적 생성 작업 분산
+
+던전 진입 시 모든 Tile의 적 배치 작업이 한 프레임에 몰리지 않도록 `CoSpawnAllEnemies`에서 Tile 단위로 작업한 뒤 `yield return null`로 다음 프레임에 이어갑니다.
+
 [EnemySpawner](Assets/Scripts/Enemy/EnemySpawner.cs)
 
-### E. 이벤트 기반 UI
+### 이벤트 기반 UI
 
-주요 HUD와 Inventory·QuickSlot은 Inventory, HP·EXP·Mana·Gold, Timer 변경 이벤트를 구독합니다. 모든 UI가 event-only라는 주장은 하지 않습니다.
-[InventoryManager](Assets/Scripts/Managers/InventoryManager.cs) · [PlayerHUDController](Assets/Scripts/UI/PlayerHUDController.cs) · [InGameHUDController](Assets/Scripts/UI/InGameHUDController.cs)
+Inventory 변경, 아이템 이동·삭제, HP·EXP·Mana·Gold, Timer처럼 상태가 바뀌는 지점에서 UI가 갱신되도록 구성했습니다. 일부 Equipment·Window 흐름은 명시적 refresh를 유지합니다.
 
-<a id=rendering-profiling></a>
+[InventoryManager](Assets/Scripts/Managers/InventoryManager.cs) ·
+[PlayerHUDController](Assets/Scripts/UI/PlayerHUDController.cs) ·
+[InGameHUDController](Assets/Scripts/UI/InGameHUDController.cs)
+
+<a id="rendering-profiling"></a>
 ## 렌더링 프로파일링
 
-**Profiler → Frame Debugger → 통제된 A/B 테스트 → 검증된 조건에만 적용**
+렌더링 최적화는 먼저 실제 InGame 상태를 확인한 뒤, 원인을 분리할 필요가 있는 항목만 별도 테스트로 검증했습니다.
+
+```text
+Profiler → Frame Debugger → Controlled A/B Test → 적용 여부 결정
+```
 
 | 측정 | 조건 | 기록 |
 |---|---|---:|
-| InGame baseline | 실제 InGame 화면 · 공개 저장소 외부 기록 | Batches 63 · SetPass 37 · Triangles 24.1k · Vertices 48.7k |
-| GPU Instancing benchmark | 동일 Mesh/Material의 64 MeshRenderer · Windows Editor / DX12 · 공개 저장소 외부 기록 | Batches 67 → 4 |
+| InGame baseline | 실제 InGame 화면 | Batches 63 · SetPass 37 · Triangles 24.1k · Vertices 48.7k |
+| GPU Instancing benchmark | 동일 Mesh/Material · 64 MeshRenderer · Windows Editor / DX12 | Batches 67 → 4 |
 
-동일 Mesh/Material 조건의 64 MeshRenderer 테스트에서 GPU Instancing 적용 전후 **Batches 67 → 4**를 확인했습니다. 이는 통제된 benchmark이며 **게임 전체 Batches가 67 → 4가 된 것이 아닙니다.** FPS, GC Alloc, CPU/GPU ms, memory 수치는 공개 근거가 없어 기재하지 않습니다.
+GPU Instancing의 `67 → 4`는 **별도 Benchmark Scene에서 동일 조건으로 비교한 결과**입니다. 실제 게임 전체의 Batches가 67에서 4로 줄었다는 의미는 아닙니다.
 
-위 수치는 공개 포트폴리오 준비 과정에서 저장소 외부에 기록된 측정값입니다. 현재 저장소에는 이를 직접 검증할 Profiler·Frame Debugger·Instancing 비교 캡처가 없습니다. [상세 측정 해석](Docs/technical/README.md#rendering-profiling)
+현재 저장소에는 해당 Profiler·Frame Debugger 원본 캡처가 포함되어 있지 않아, 정량 수치는 위 측정 기록까지만 사용하고 있습니다.
 
-<a id=troubleshooting></a>
+[상세 측정 해석](Docs/technical/README.md#rendering-profiling)
+
+<a id="troubleshooting"></a>
 ## 트러블슈팅
 
-| 순서 | 사례 | 현재 상태 |
-|---:|---|---|
-| 1 | Enemy multi-frame scan이 첫 chunk 후 멈춤 | scan state·captured position·cursor 수정 반영 |
-| 2 | 이동 중 Grid active tiles 누적 | desired/current 집합 조정 반영 |
-| 3 | 풀링 Enemy가 이전 lifecycle state 유지 | reset code 반영 |
-| 4 | Inventory / Equipment / QuickSlot ownership 충돌 | ownership 분리 반영 |
-| 5 | 제한된 Tile assets와 replayable dungeon | prefab 조합 방식 반영 |
+기능 구현 이후 실제 플레이와 디버깅 과정에서 다시 손본 사례들입니다.
 
-각 사례의 **문제 → 관찰 / 진단 → 근본 원인 → 수정 → 검증**은 [상세 기술 문서](Docs/technical/README.md#troubleshooting)에 정리했습니다.
+| 사례 | 무엇이 문제였나 | 어떻게 바꿨나 |
+|---|---|---|
+| Enemy Multi-frame Scan | 첫 chunk 이후 플레이어가 멈추면 남은 Enemy 검사가 진행되지 않음 | 이동 감지와 Scan 진행 상태를 분리하고 전체 대상 완료까지 cursor 유지 |
+| Grid Active Tiles | 이동할수록 활성 Tile이 누적됨 | 현재 활성 집합과 필요한 집합을 비교해 Enable / Disable |
+| Pooled Enemy Lifecycle | 재사용한 Enemy에 이전 체력·AI·Target·사망 상태가 남을 수 있음 | `OnSpawnInitialize`에서 재사용 상태를 명시적으로 초기화 |
+| Item Ownership | Inventory·Equipment·QuickSlot을 하나의 슬롯 규칙으로 처리하기 어려움 | 실제 소유와 참조 책임을 분리하고 QuickSlot은 GUID로 추적 |
+| Replayable Dungeon | 완전 절차 생성은 1인 개발 범위에서 비용이 큼 | 검증된 Tile prefab을 조합해 세션마다 배치와 진행 경로 변화 |
+
+각 사례의 코드 흐름과 수정 이유는 [상세 기술 문서](Docs/technical/README.md#troubleshooting)에 더 자세히 정리했습니다.
 
 ![ASH:BORN extraction and result flow](Docs/screenshots/portfolio/composite/extraction-flow.jpg)
 
-<a id=code-map></a>
+<a id="code-map"></a>
 ## 코드 맵
 
-| 검토 영역 | 시작 코드 |
+| 보고 싶은 영역 | 시작 코드 |
 |---|---|
 | 게임·세션 | [GameManager](Assets/Scripts/Managers/GameManager.cs), [InGameManager](Assets/Scripts/Managers/InGameManager.cs) |
-| Combat·Enemy AI | [EnemyController](Assets/Scripts/Enemy/EnemyController.cs), [EnemyDetection](Assets/Scripts/Enemy/EnemyDetection.cs), [Enemy Nodes](Assets/Scripts/Enemy/Node) |
+| Combat · Enemy AI | [EnemyController](Assets/Scripts/Enemy/EnemyController.cs), [EnemyDetection](Assets/Scripts/Enemy/EnemyDetection.cs), [Enemy Nodes](Assets/Scripts/Enemy/Node) |
 | Skill | [SkillManager](Assets/Scripts/Managers/SkillManager.cs), [ISkill](Assets/Scripts/Interface/ISkill.cs) |
-| Item ownership | [InventoryManager](Assets/Scripts/Managers/InventoryManager.cs), [EquipmentManager](Assets/Scripts/Managers/EquipmentManager.cs), [QuickSlotManager](Assets/Scripts/Managers/QuickSlotManager.cs) |
-| Pool·Enemy lifecycle | [ObjectPoolManager](Assets/Scripts/Managers/ObjectPoolManager.cs), [EnemySpawner](Assets/Scripts/Enemy/EnemySpawner.cs), [EnemyController](Assets/Scripts/Enemy/EnemyController.cs) |
-| Enemy Scan·Grid Activation | [EnemyCullingManager](Assets/Scripts/Managers/EnemyCullingManager.cs), [MapManager](Assets/Scripts/Managers/MapManager.cs) |
-| Event-driven UI | [PlayerHUDController](Assets/Scripts/UI/PlayerHUDController.cs), [InGameHUDController](Assets/Scripts/UI/InGameHUDController.cs) |
+| Item | [InventoryManager](Assets/Scripts/Managers/InventoryManager.cs), [EquipmentManager](Assets/Scripts/Managers/EquipmentManager.cs), [QuickSlotManager](Assets/Scripts/Managers/QuickSlotManager.cs) |
+| Pool · Enemy Lifecycle | [ObjectPoolManager](Assets/Scripts/Managers/ObjectPoolManager.cs), [EnemySpawner](Assets/Scripts/Enemy/EnemySpawner.cs), [EnemyController](Assets/Scripts/Enemy/EnemyController.cs) |
+| Enemy Scan · Grid Activation | [EnemyCullingManager](Assets/Scripts/Managers/EnemyCullingManager.cs), [MapManager](Assets/Scripts/Managers/MapManager.cs) |
+| UI 갱신 | [PlayerHUDController](Assets/Scripts/UI/PlayerHUDController.cs), [InGameHUDController](Assets/Scripts/UI/InGameHUDController.cs) |
 
-## 문서
+## 더 자세한 문서
 
-- [상세 기술 문서](Docs/technical/README.md) — 런타임·렌더링·트러블슈팅 근거
-- [클라이언트 구조](Docs/architecture/README.md) — Client·Inventory·Skill·Map 다이어그램
-- [스크린샷 목록](Docs/screenshots/portfolio/README.md) — 공개 이미지 크기와 용도
+- [상세 기술 문서](Docs/technical/README.md) — 런타임 성능, 렌더링 측정, 트러블슈팅
+- [클라이언트 구조](Docs/architecture/README.md) — Client, Inventory, Skill, Map 다이어그램
+- [스크린샷 목록](Docs/screenshots/portfolio/README.md) — README와 포트폴리오에서 사용하는 이미지
 
-## 공개 포트폴리오 범위
-
-포함: 공개 가능한 Unity C# 코드, ScriptableObject 예시, 설계·기술 문서, 직접 캡처한 화면.
-제외: 라이선스 assets, 모델·애니메이션·오디오, 전체 scenes·prefabs, credentials, 광고·스토어 배포 설정, private data.
-
-**Release status:** Google Play 비공개 테스트 완료 · 프로덕션 출시 심사 진행. Google Play production release 완료 또는 live 상태로 표기하지 않습니다.
+> 이 저장소에는 직접 구현한 공개용 C# 코드와 기술 문서를 담았습니다. 라이선스가 있는 에셋, 전체 Scene·Prefab, 광고·스토어 배포 설정과 민감 정보는 포함하지 않습니다.
